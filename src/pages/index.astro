@@ -1,0 +1,477 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import MatchCard from '../components/MatchCard.astro';
+import { getCollection } from 'astro:content';
+import { loadFixtures } from '../lib/fixtures';
+import { roundOf } from '../lib/clubs';
+
+const data = await loadFixtures();
+
+// Latest result per football team (most recent by date)
+const latestByTeam = data.teams
+  .filter((t) => t.code === 'football')
+  .map((t) => {
+    const latest = [...t.results].sort((a, b) => (a.date < b.date ? 1 : -1))[0];
+    return latest ? { label: t.label, result: latest } : undefined;
+  })
+  .filter((x): x is { label: string; result: typeof data.teams[number]['results'][number] } => !!x);
+
+const news = (await getCollection('news', ({ data }) => !data.draft))
+  .sort((a, b) => +b.data.date - +a.data.date)
+  .slice(0, 3);
+
+// Latest team sheet photo per team (from Decap CMS / content/team_selections)
+const teamSelections = await getCollection('team_selections');
+const latestSelectionFor = (slug: 'seniors' | 'reserves' | 'under-19-5') => {
+  const matching = teamSelections
+    .filter((s) => s.data.team === slug)
+    .sort((a, b) => +b.data.date - +a.data.date);
+  return matching[0];
+};
+
+// Teams featured on the home page
+const teams = [
+  { slug: 'seniors' as const, name: 'Seniors', tagline: 'Div 2' },
+  { slug: 'reserves' as const, name: 'Reserves', tagline: 'Div 2' },
+  { slug: 'under-19-5' as const, name: 'Under 19.5', tagline: 'Div 2' },
+].map((t) => {
+  const sel = latestSelectionFor(t.slug);
+  return {
+    ...t,
+    photo: sel?.data.photo ?? '',
+    added: sel?.data.date ? sel.data.date.toISOString() : '',
+  };
+});
+
+// Sponsor logo list (files in /public/images/sponsors)
+const sponsors = [
+  { name: 'Bendigo Bank', file: 'bendigo-bank-mooroolbark.png', desc: 'Community Bank Mooroolbark', address: 'Shop 19, 66-74 Brice Ave, Mooroolbark', phone: '9726 5388', website: 'https://www.bendigobank.com.au/branch/vic/community-bank-mooroolbark/' },
+  { name: 'Bubba Pizza', file: 'bubba-pizza.png', desc: 'Pizza, pasta & more. Let Bubba make it better', address: '111 Bayswater Rd, Croydon', phone: '9723 8611', website: 'https://www.bubbapizza.com.au/bubba-pizza-croydon/' },
+  { name: 'Cavalier Homes', file: 'cavalier-homes.jpg', desc: 'Real Homes, Real People. Custom new home builders across the eastern suburbs', phone: '1300 228 254', website: 'https://cavalierhomes.com.au/builders/melbourne-east/' },
+  { name: "Clark's Body Works", file: 'clarks-body-works.jpg', desc: 'Panel beating, smash repair & spray painting', address: '21 Hewish Rd, Croydon', phone: '9723 2108' },
+  { name: 'Cr Chris Jones', file: 'chris-jones.png', desc: 'Barngeong Ward, Maroondah City Council. Proudly supporting local sport', phone: '0480 023 522', website: 'https://www.chris-jones.com.au/' },
+  { name: 'David Hodgett MP', file: 'david-hodgett.png', desc: 'Liberal Member for Croydon. Proudly supporting local sport', address: '60 Main St, Croydon', phone: '9725 3570', website: 'https://www.davidhodgett.com.au/' },
+  { name: 'Direct Chemist Outlet Croydon', file: 'direct-chemist-outlet.png', desc: 'Discount chemist in the heart of Croydon', address: '88-92 Main St, Croydon', phone: '9723 7711', website: 'https://www.directchemistoutlet.com.au/pages/croydon' },
+  { name: 'Dorset Gardens Hotel', file: 'dorset-gardens.png', desc: 'Premier pub, tavern & bistro in the eastern suburbs', address: '335 Dorset Rd, Croydon', phone: '9725 6211', website: 'https://www.dorsetgardenshotel.com.au/' },
+  { name: 'Ecoplumb Contracting Services', file: 'ecoplumb.png', desc: 'Plumbing, gas fitting, drainage & fire protection', address: '4/88 Merrindale Dve, Croydon South', phone: '0412 229 586', website: 'https://ecoplumb.com.au/' },
+  { name: 'Fairmont Medical', file: 'fairmont-medical.png', desc: 'Australian owned surgical & medical device manufacturer since 1988', address: '11 Scoresby Rd, Bayswater', phone: '1300 972 088', website: 'https://www.fairmontmedical.com.au/' },
+  { name: 'GP HVAC Group', file: 'gp-hvac-group.png', desc: 'Gas & HVAC supplies for trade professionals', address: '2/34 Research Dr, Croydon South', phone: '9112 9003', website: 'https://gphvac.com.au/' },
+  { name: 'GreenPhase Technologies', file: 'greenphase-technologies.jpg', desc: 'Domestic, commercial & industrial electrical services' },
+  { name: 'LaTink', file: 'latink.png', desc: 'Australian-made outdoor furniture, garden screens & homewares', address: '1/5 Corporate Blvd, Bayswater', phone: '8761 2111', website: 'https://latink.com.au/' },
+  { name: 'Lilydale Safety Wear', file: 'lilydale-safety-wear.png', desc: 'Protecting you from head to toe. Workwear, safety boots & hi-vis', address: '1/70-72 Cave Hill Rd, Lilydale', phone: '9739 7323', website: 'https://lilydalesafetywear.com.au/' },
+  { name: 'McGrath Croydon', file: 'mcgrath.png', desc: 'Local real estate experts in Croydon and surrounds', address: '159 Main St, Croydon', phone: '8595 2777', website: 'https://www.mcgrath.com.au/offices/201-croydon' },
+  { name: 'Nomis', file: 'nomis.png', desc: 'Reblocking & underpinning specialists. 30+ years industry experience', phone: '0411 646 886' },
+  { name: 'Pure Candle Supplies', file: 'pure-candle-supplies.png', desc: 'Wholesale candle making supplies & showroom', address: '17 Lacey St, Croydon', phone: '9730 2213', website: 'https://www.purecandlesupplies.com.au/' },
+  { name: 'Sporting Fine Art', file: 'sporting-fine-art.png', desc: 'Art x Merch. Elite artwork and premium merchandise for grassroots sport', address: '8/51-55 Centre Way, Croydon South', phone: '8201 6991', website: 'https://sportingfineart.com.au/' },
+  { name: 'Stevens Glass', file: 'stevens-glass.png', desc: 'Glass fabrication & glazing. Proprietors: Fraraccio Brothers', address: '375 Maroondah Hwy, Croydon North', phone: '9726 6488', website: 'https://www.stevensglass.com.au/' },
+];
+---
+<BaseLayout title="Croydon FNC - The Blues">
+  <!-- HERO: full-bleed navy split with mascot (AFL-style dramatic player cutout) -->
+  <section class="relative overflow-hidden bg-gradient-to-br from-club-primary via-club-primary to-club-dark text-white">
+    <!-- decorative diagonal stripe -->
+    <div class="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-white/5 [clip-path:polygon(20%_0,100%_0,100%_100%,0%_100%)]"></div>
+    <!-- decorative faint crest watermark -->
+    <div class="pointer-events-none absolute -left-20 -bottom-20 opacity-[0.06]">
+      <div class="text-[26rem] font-display leading-none">CFNC</div>
+    </div>
+
+    <div class="relative max-w-6xl mx-auto px-4 py-16 lg:py-24 grid lg:grid-cols-12 gap-8 items-center">
+      <div class="lg:col-span-7 text-center lg:text-left">
+        <div class="text-[11px] uppercase tracking-[0.3em] text-white/70">
+          Eastern Football Netball League
+        </div>
+        <h1 class="font-display text-5xl sm:text-6xl lg:text-7xl tracking-widest mt-4 leading-[0.95]">
+          CROYDON<br/><span class="text-white">BLUES</span>
+        </h1>
+        <div class="mt-3 text-xs sm:text-sm uppercase tracking-[0.4em] text-white/70">Est. 1906</div>
+        <p class="mt-4 text-white/80 text-lg max-w-xl mx-auto lg:mx-0">Hard work and commitment, since 1906. The pride of Croydon, on the oval and the netball court.</p>
+        <div class="mt-8 flex flex-wrap justify-center lg:justify-start gap-3">
+          <a href="/fixtures" class="bg-white text-club-primary px-6 py-3 rounded font-semibold hover:opacity-90">Fixture</a>
+          <a href="/registration" class="border border-white/40 px-6 py-3 rounded font-semibold hover:bg-white/10">Join the Blues</a>
+        </div>
+      </div>
+      <div class="lg:col-span-5 relative flex justify-center lg:justify-end">
+        <img
+          src="/images/blueboy.png"
+          alt="Croydon Blues mascot charging with the footy"
+          width="1024"
+          height="1024"
+          fetchpriority="high"
+          decoding="async"
+          class="relative z-10 w-64 sm:w-80 lg:w-full max-w-sm h-auto drop-shadow-[0_20px_40px_rgba(0,0,0,0.55)]"
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- BRAND BAND: modern logo feature strip (AFL-style club identity block) -->
+  <section class="bg-white border-b border-slate-200">
+    <div class="max-w-6xl mx-auto px-4 py-10 lg:py-14 grid lg:grid-cols-12 gap-8 items-center">
+      <div class="lg:col-span-4 flex justify-center lg:justify-start">
+        <img
+          src="/images/modern-logo.png"
+          alt="Croydon Blues Football Club - Est. 1906"
+          width="1024"
+          height="1024"
+          decoding="async"
+          class="w-56 lg:w-72 h-auto"
+        />
+      </div>
+      <div class="lg:col-span-8 text-center lg:text-left">
+        <div class="text-xs uppercase tracking-[0.3em] text-club-secondary">Our club</div>
+        <h2 class="font-display text-3xl lg:text-4xl text-club-primary mt-1 tracking-wide">ONE CLUB. ONE COMMUNITY. THE BLUES.</h2>
+        <p class="mt-3 text-slate-600 lg:text-lg">From the under-19.5s to the senior side, Croydon FNC has represented the eastern suburbs with grit and heart for more than a century. Whether you're pulling on the jumper or cheering from the fence, there's a place for you at Croydon Park.</p>
+        <div class="mt-5 flex flex-wrap justify-center lg:justify-start gap-4 text-sm">
+          <a href="/squad" class="text-club-primary font-semibold hover:text-club-secondary">Meet the squad →</a>
+          <a href="/news" class="text-club-primary font-semibold hover:text-club-secondary">Latest news →</a>
+          <a href="/uniform" class="text-club-primary font-semibold hover:text-club-secondary">Club uniform →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {latestByTeam.length > 0 && (
+    <section class="max-w-6xl mx-auto px-4 pt-10 pb-12 border-b border-slate-200">
+      <div class="flex items-baseline justify-between mb-5">
+        <div>
+          <div class="text-xs uppercase tracking-[0.3em] text-club-secondary">Scoreboard</div>
+          <h2 class="font-display text-3xl lg:text-4xl text-club-primary tracking-wide">LATEST RESULTS</h2>
+        </div>
+        <a href="/fixtures" class="hidden sm:inline text-sm font-semibold text-club-primary hover:text-club-secondary">All fixtures →</a>
+      </div>
+
+      <div class="flex flex-col gap-5 max-w-2xl mx-auto">
+        {latestByTeam.map(({ label, result: r }) => (
+          <MatchCard
+            teamLabel={label}
+            round={roundOf(r.competition) ?? 0}
+            date={r.date}
+            home={r.home}
+            away={r.away}
+            homeGoals={r.homeGoals}
+            homeBehinds={r.homeBehinds}
+            awayGoals={r.awayGoals}
+            awayBehinds={r.awayBehinds}
+          />
+        ))}
+      </div>
+    </section>
+  )}
+
+  {news.length > 0 && (
+    <section class="max-w-6xl mx-auto px-4 py-12">
+      <div class="flex items-baseline justify-between mb-6">
+        <div>
+          <div class="text-xs uppercase tracking-[0.3em] text-club-secondary">Latest from the club</div>
+          <h2 class="font-display text-3xl lg:text-4xl text-club-primary tracking-wide">NEWS</h2>
+        </div>
+        <a href="/news" class="hidden sm:inline text-sm font-semibold text-club-primary hover:text-club-secondary">All articles →</a>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {news.map((post) => (
+          <a href={`/news/${post.slug}`} class="group bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden hover:shadow-lg transition flex flex-col">
+            <div class="relative aspect-[16/10] bg-club-primary overflow-hidden">
+              {post.data.hero?.src ? (
+                <img
+                  src={post.data.hero.src}
+                  alt=""
+                  class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                  loading="lazy"
+                  decoding="async"
+                />
+              ) : (
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <div class="font-display text-[8rem] leading-none text-white/10">CFNC</div>
+                </div>
+              )}
+              <div class="absolute top-3 left-3 bg-club-secondary text-white text-[10px] font-bold uppercase tracking-[0.2em] px-2 py-1 rounded">
+                {post.data.category}
+              </div>
+            </div>
+            <div class="p-5 flex-1 flex flex-col">
+              <div class="text-[11px] uppercase tracking-[0.2em] text-slate-500">
+                {post.data.date.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}
+              </div>
+              <h3 class="font-display text-xl text-club-primary mt-1 tracking-wide leading-tight group-hover:text-club-secondary transition">{post.data.title}</h3>
+              {post.data.summary && <p class="mt-2 text-sm text-slate-600 line-clamp-3">{post.data.summary}</p>}
+              <div class="mt-auto pt-4 text-xs font-semibold uppercase tracking-widest text-club-primary group-hover:text-club-secondary transition">
+                Read article →
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- TEAMS: featured sides (AFL-style team pillars) -->
+  <section class="bg-slate-100 border-y border-slate-200">
+    <div class="max-w-6xl mx-auto px-4 py-14">
+      <div class="flex items-baseline justify-between mb-8">
+        <div>
+          <div class="text-xs uppercase tracking-[0.3em] text-club-secondary">Our sides</div>
+          <h2 class="font-display text-3xl lg:text-4xl text-club-primary tracking-wide">TEAM SELECTION FOR THIS WEEK</h2>
+        </div>
+        <a href="/squad" class="hidden sm:inline text-sm font-semibold text-club-primary hover:text-club-secondary">All players →</a>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {teams.map((t) => (
+          <button
+            type="button"
+            data-team-card
+            data-team-slug={t.slug}
+            data-team-name={t.name}
+            data-team-photo={t.photo}
+            data-team-added={t.added}
+            class="group relative overflow-hidden rounded-lg bg-club-primary text-white p-6 min-h-[180px] flex flex-col justify-between shadow-sm hover:shadow-lg transition text-left"
+          >
+            <div class="pointer-events-none absolute -right-8 -bottom-8 opacity-10 font-display text-[9rem] leading-none group-hover:opacity-20 transition">CFC</div>
+            <div class="relative">
+              <div class="text-[11px] uppercase tracking-[0.3em] text-club-secondary">{t.tagline}</div>
+              <h3 class="font-display text-3xl mt-1 tracking-wider">{t.name}</h3>
+            </div>
+            <div class="relative">
+              <div class="text-xs font-semibold uppercase tracking-widest text-white group-hover:text-club-secondary">View team sheet →</div>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- TEAM SHEET MODAL -->
+  <div
+    id="team-modal"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="team-modal-title"
+  >
+    <div class="relative w-full max-w-2xl rounded-lg bg-white shadow-xl">
+      <button
+        type="button"
+        id="team-modal-close"
+        class="absolute top-3 right-3 text-slate-500 hover:text-slate-900 text-2xl leading-none"
+        aria-label="Close"
+      >×</button>
+      <div class="p-6 border-b border-slate-200">
+        <div class="text-xs uppercase tracking-[0.3em] text-club-secondary">Team selection</div>
+        <h3 id="team-modal-title" class="font-display text-3xl text-club-primary tracking-wide mt-1">TEAM</h3>
+        <div class="mt-2 text-sm text-slate-600">Added: <span id="team-modal-added">-</span></div>
+      </div>
+      <div class="p-6">
+        <div id="team-modal-image-wrap" class="bg-slate-100 rounded border border-slate-200 min-h-[240px] flex items-center justify-center overflow-hidden">
+          <img id="team-modal-image" alt="" class="hidden max-h-[60vh] w-auto" />
+          <p id="team-modal-empty" class="text-sm text-slate-500 p-6 text-center">No team sheet uploaded yet for this week.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script is:inline>
+    (function () {
+      const modal = document.getElementById('team-modal');
+      if (!modal) return;
+      const titleEl = document.getElementById('team-modal-title');
+      const addedEl = document.getElementById('team-modal-added');
+      const imgEl = document.getElementById('team-modal-image');
+      const emptyEl = document.getElementById('team-modal-empty');
+      const closeBtn = document.getElementById('team-modal-close');
+
+      function formatAdded(iso) {
+        if (!iso) return '-';
+        const d = new Date(iso);
+        if (isNaN(d.getTime())) return '-';
+        return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+      }
+
+      function render(photo, added) {
+        if (photo) {
+          imgEl.src = photo;
+          imgEl.classList.remove('hidden');
+          emptyEl.classList.add('hidden');
+        } else {
+          imgEl.src = '';
+          imgEl.classList.add('hidden');
+          emptyEl.classList.remove('hidden');
+        }
+        addedEl.textContent = formatAdded(added);
+      }
+
+      function openModal(name, photo, added) {
+        titleEl.textContent = (name || '').toUpperCase();
+        render(photo, added);
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeModal() {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = '';
+      }
+
+      document.querySelectorAll('[data-team-card]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          openModal(
+            btn.getAttribute('data-team-name'),
+            btn.getAttribute('data-team-photo'),
+            btn.getAttribute('data-team-added')
+          );
+        });
+      });
+
+      closeBtn.addEventListener('click', closeModal);
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
+      });
+    })();
+  </script>
+
+  <!-- SPONSORS: partner logo grid (AFL-style partner strip) -->
+  <section class="bg-white">
+    <div class="max-w-6xl mx-auto px-4 py-14">
+      <div class="text-center mb-8">
+        <div class="text-xs uppercase tracking-[0.3em] text-club-secondary">Proudly supported by</div>
+        <h2 class="font-display text-3xl lg:text-4xl text-club-primary tracking-wide">SPONSORS</h2>
+        <p class="mt-2 text-slate-600 text-sm max-w-xl mx-auto">The Blues thank our partners for backing grassroots footy in Croydon. Interested in joining the sponsor family? <a href="/contact" class="text-club-primary font-semibold hover:text-club-secondary underline">Get in touch →</a></p>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        {sponsors.map((s) => (
+          <button
+            type="button"
+            data-sponsor
+            data-sponsor-name={s.name}
+            data-sponsor-file={s.file}
+            data-sponsor-desc={s.desc ?? ''}
+            data-sponsor-phone={s.phone ?? ''}
+            data-sponsor-address={s.address ?? ''}
+            data-sponsor-website={s.website ?? ''}
+            class="bg-slate-50 border border-slate-200 rounded-lg aspect-[3/2] flex items-center justify-center p-4 hover:border-club-secondary hover:shadow-md transition cursor-pointer"
+          >
+            <img src={`/images/sponsors/${s.file}`} alt={s.name} class="w-full h-full object-contain" loading="lazy" />
+          </button>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- SPONSOR MODAL -->
+  <div
+    id="sponsor-modal"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="sponsor-modal-title"
+  >
+    <div class="relative w-full max-w-md rounded-lg bg-white shadow-xl overflow-hidden">
+      <button
+        type="button"
+        id="sponsor-modal-close"
+        class="absolute top-3 right-3 z-10 text-slate-500 hover:text-slate-900 text-2xl leading-none"
+        aria-label="Close"
+      >&times;</button>
+      <div class="bg-slate-50 border-b border-slate-200 p-6 flex items-center justify-center aspect-[3/2]">
+        <img id="sponsor-modal-image" alt="" class="w-full h-full object-contain" />
+      </div>
+      <div class="p-6">
+        <h3 id="sponsor-modal-title" class="font-display text-2xl text-club-primary tracking-wide"></h3>
+        <p id="sponsor-modal-desc" class="mt-2 text-slate-600"></p>
+        <div id="sponsor-modal-address" class="mt-3 flex items-start gap-2 text-sm text-slate-700 hidden">
+          <svg class="w-4 h-4 text-club-secondary mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span id="sponsor-modal-address-text"></span>
+        </div>
+        <div id="sponsor-modal-phone" class="mt-2 flex items-center gap-2 text-sm text-slate-700 hidden">
+          <svg class="w-4 h-4 text-club-secondary shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          <a id="sponsor-modal-phone-text" class="text-club-primary hover:underline"></a>
+        </div>
+        <div id="sponsor-modal-website" class="mt-2 flex items-center gap-2 text-sm text-slate-700 hidden">
+          <svg class="w-4 h-4 text-club-secondary shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <a id="sponsor-modal-website-text" class="text-club-primary hover:underline" target="_blank" rel="noopener noreferrer"></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script is:inline>
+    (function () {
+      const modal = document.getElementById('sponsor-modal');
+      if (!modal) return;
+      const titleEl = document.getElementById('sponsor-modal-title');
+      const descEl = document.getElementById('sponsor-modal-desc');
+      const imgEl = document.getElementById('sponsor-modal-image');
+      const addressWrap = document.getElementById('sponsor-modal-address');
+      const addressText = document.getElementById('sponsor-modal-address-text');
+      const phoneWrap = document.getElementById('sponsor-modal-phone');
+      const phoneText = document.getElementById('sponsor-modal-phone-text');
+      const websiteWrap = document.getElementById('sponsor-modal-website');
+      const websiteText = document.getElementById('sponsor-modal-website-text');
+      const closeBtn = document.getElementById('sponsor-modal-close');
+
+      function openModal(btn) {
+        var name = btn.getAttribute('data-sponsor-name');
+        var file = btn.getAttribute('data-sponsor-file');
+        var desc = btn.getAttribute('data-sponsor-desc');
+        var phone = btn.getAttribute('data-sponsor-phone');
+        var address = btn.getAttribute('data-sponsor-address');
+        var website = btn.getAttribute('data-sponsor-website');
+
+        titleEl.textContent = name;
+        imgEl.src = '/images/sponsors/' + file;
+        imgEl.alt = name;
+        descEl.textContent = desc || '';
+
+        if (address) {
+          addressText.textContent = address;
+          addressWrap.classList.remove('hidden');
+        } else {
+          addressWrap.classList.add('hidden');
+        }
+
+        if (phone) {
+          phoneText.textContent = phone;
+          phoneText.href = 'tel:' + phone.replace(/\s/g, '');
+          phoneWrap.classList.remove('hidden');
+        } else {
+          phoneWrap.classList.add('hidden');
+        }
+
+        if (website) {
+          var displayUrl = website.replace(/^https?:\/\//, '').replace(/\/$/, '');
+          websiteText.textContent = displayUrl;
+          websiteText.href = website;
+          websiteWrap.classList.remove('hidden');
+        } else {
+          websiteWrap.classList.add('hidden');
+        }
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeModal() {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = '';
+      }
+
+      document.querySelectorAll('[data-sponsor]').forEach(function (btn) {
+        btn.addEventListener('click', function () { openModal(btn); });
+      });
+
+      closeBtn.addEventListener('click', closeModal);
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) closeModal();
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
+      });
+    })();
+  </script>
+</BaseLayout>

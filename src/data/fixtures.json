@@ -1,0 +1,116 @@
+{
+  "updated": "2026-07-16",
+  "teams": [
+    {
+      "label": "Seniors",
+      "code": "football",
+      "fixtures": [
+        { "date": "2026-07-18", "bounce": "14:20", "home": "Croydon Seniors", "away": "Ringwood Seniors", "venue": "Croydon Park Oval", "competition": "Div 2 - Eastland Senior Men · Round 14" },
+        { "date": "2026-07-25", "bounce": "14:20", "home": "Croydon Seniors", "away": "Waverley Blues Seniors", "venue": "Croydon Park Oval", "competition": "Div 2 - Eastland Senior Men · Round 15" },
+        { "date": "2026-08-01", "bounce": "14:20", "home": "Scoresby Seniors", "away": "Croydon Seniors", "venue": "Scoresby Recreation Reserve", "competition": "Div 2 - Eastland Senior Men · Round 16" },
+        { "date": "2026-08-08", "bounce": "14:20", "home": "Mulgrave Seniors", "away": "Croydon Seniors", "venue": "Mulgrave Reserve", "competition": "Div 2 - Eastland Senior Men · Round 17" },
+        { "date": "2026-08-15", "bounce": "14:20", "home": "Croydon Seniors", "away": "Surrey Park Seniors", "venue": "Croydon Park Oval", "competition": "Div 2 - Eastland Senior Men · Round 18" }
+      ],
+      "results": [
+        { "date": "2026-07-11", "home": "Templestowe Seniors", "away": "Croydon Seniors", "homeGoals": 8, "homeBehinds": 9, "awayGoals": 7, "awayBehinds": 9, "competition": "Div 2 - Eastland Senior Men · Round 13" },
+        { "date": "2026-07-04", "home": "Croydon Seniors", "away": "East Burwood Seniors", "homeGoals": 8, "homeBehinds": 9, "awayGoals": 12, "awayBehinds": 6, "competition": "Div 2 - Eastland Senior Men · Round 12" },
+        { "date": "2026-06-27", "home": "Croydon Seniors", "away": "Heathmont Seniors", "homeGoals": 7, "homeBehinds": 12, "awayGoals": 7, "awayBehinds": 6, "competition": "Div 2 - Eastland Senior Men · Round 11" },
+        { "date": "2026-06-20", "home": "Lilydale Seniors", "away": "Croydon Seniors", "homeGoals": 8, "homeBehinds": 7, "awayGoals": 13, "awayBehinds": 13, "competition": "Div 2 - Eastland Senior Men · Round 10" },
+        { "date": "2026-06-13", "home": "Surrey Park Seniors", "away": "Croydon Seniors", "homeGoals": 20, "homeBehinds": 11, "awayGoals": 13, "awayBehinds": 5, "competition": "Div 2 - Eastland Senior Men · Round 9" },
+        { "date": "2026-05-30", "home": "Croydon Seniors", "away": "Mulgrave Seniors", "homeGoals": 16, "homeBehinds": 17, "awayGoals": 10, "awayBehinds": 9, "competition": "Div 2 - Eastland Senior Men · Round 8" },
+        { "date": "2026-05-23", "home": "Croydon Seniors", "away": "Scoresby Seniors", "homeGoals": 15, "homeBehinds": 9, "awayGoals": 12, "awayBehinds": 6, "competition": "Div 2 - Eastland Senior Men · Round 7" },
+        { "date": "2026-05-16", "home": "Waverley Blues Seniors", "away": "Croydon Seniors", "homeGoals": 10, "homeBehinds": 13, "awayGoals": 7, "awayBehinds": 9, "competition": "Div 2 - Eastland Senior Men · Round 6" },
+        { "date": "2026-05-09", "home": "Ringwood Seniors", "away": "Croydon Seniors", "homeGoals": 7, "homeBehinds": 7, "awayGoals": 10, "awayBehinds": 14, "competition": "Div 2 - Eastland Senior Men · Round 5" },
+        { "date": "2026-05-02", "home": "Croydon Seniors", "away": "Templestowe Seniors", "homeGoals": 11, "homeBehinds": 10, "awayGoals": 16, "awayBehinds": 8, "competition": "Div 2 - Eastland Senior Men · Round 4" },
+        { "date": "2026-04-25", "home": "East Burwood Seniors", "away": "Croydon Seniors", "homeGoals": 6, "homeBehinds": 10, "awayGoals": 6, "awayBehinds": 16, "competition": "Div 2 - Eastland Senior Men · Round 3" },
+        { "date": "2026-04-18", "home": "Heathmont Seniors", "away": "Croydon Seniors", "homeGoals": 15, "homeBehinds": 12, "awayGoals": 11, "awayBehinds": 3, "competition": "Div 2 - Eastland Senior Men · Round 2" },
+        { "date": "2026-04-11", "home": "Croydon Seniors", "away": "Lilydale Seniors", "homeGoals": 6, "homeBehinds": 9, "awayGoals": 4, "awayBehinds": 4, "competition": "Div 2 - Eastland Senior Men · Round 1" }
+      ],
+      "table": [
+        { "pos": 1,  "team": "Surrey Park Seniors",     "p": 13, "w": 12, "l": 1,  "d": 0, "pf": 0, "pa": 0, "pct": 155.19, "pts": 48 },
+        { "pos": 2,  "team": "Templestowe Seniors",     "p": 13, "w": 11, "l": 2,  "d": 0, "pf": 0, "pa": 0, "pct": 133.77, "pts": 44 },
+        { "pos": 3,  "team": "Mulgrave Seniors",        "p": 13, "w": 8,  "l": 5,  "d": 0, "pf": 0, "pa": 0, "pct": 119.96, "pts": 32 },
+        { "pos": 4,  "team": "Lilydale Seniors",        "p": 13, "w": 8,  "l": 5,  "d": 0, "pf": 0, "pa": 0, "pct": 107.93, "pts": 32 },
+        { "pos": 5,  "team": "Croydon Seniors",         "p": 13, "w": 7,  "l": 6,  "d": 0, "pf": 0, "pa": 0, "pct": 99.67,  "pts": 28 },
+        { "pos": 6,  "team": "Waverley Blues Seniors",  "p": 13, "w": 6,  "l": 7,  "d": 0, "pf": 0, "pa": 0, "pct": 75.18,  "pts": 24 },
+        { "pos": 7,  "team": "East Burwood Seniors",    "p": 13, "w": 4,  "l": 9,  "d": 0, "pf": 0, "pa": 0, "pct": 103.58, "pts": 16 },
+        { "pos": 8,  "team": "Heathmont Seniors",       "p": 13, "w": 4,  "l": 9,  "d": 0, "pf": 0, "pa": 0, "pct": 77.12,  "pts": 16 },
+        { "pos": 9,  "team": "Scoresby Seniors",        "p": 13, "w": 3,  "l": 10, "d": 0, "pf": 0, "pa": 0, "pct": 78.14,  "pts": 12 },
+        { "pos": 10, "team": "Ringwood Seniors",        "p": 13, "w": 2,  "l": 11, "d": 0, "pf": 0, "pa": 0, "pct": 71.93,  "pts": 8 }
+      ]
+    },
+    {
+      "label": "Reserves",
+      "code": "football",
+      "fixtures": [
+        { "date": "2026-07-18", "bounce": "12:20", "home": "Croydon Reserves", "away": "Ringwood Reserves", "venue": "Croydon Park Oval", "competition": "Div 2 - Reserve Men · Round 14" },
+        { "date": "2026-07-25", "bounce": "12:20", "home": "Croydon Reserves", "away": "Waverley Blues Reserves", "venue": "Croydon Park Oval", "competition": "Div 2 - Reserve Men · Round 15" },
+        { "date": "2026-08-01", "bounce": "12:20", "home": "Scoresby Reserves", "away": "Croydon Reserves", "venue": "Scoresby Recreation Reserve", "competition": "Div 2 - Reserve Men · Round 16" },
+        { "date": "2026-08-08", "bounce": "12:20", "home": "Mulgrave Reserves", "away": "Croydon Reserves", "venue": "Mulgrave Reserve", "competition": "Div 2 - Reserve Men · Round 17" },
+        { "date": "2026-08-15", "bounce": "12:20", "home": "Croydon Reserves", "away": "Surrey Park Reserves", "venue": "Croydon Park Oval", "competition": "Div 2 - Reserve Men · Round 18" }
+      ],
+      "results": [
+        { "date": "2026-07-11", "home": "Templestowe Reserves", "away": "Croydon Reserves", "homeGoals": 2, "homeBehinds": 3, "awayGoals": 16, "awayBehinds": 7, "competition": "Div 2 - Reserve Men · Round 13" },
+        { "date": "2026-07-04", "home": "Croydon Reserves", "away": "East Burwood Reserves", "homeGoals": 6, "homeBehinds": 11, "awayGoals": 6, "awayBehinds": 10, "competition": "Div 2 - Reserve Men · Round 12" },
+        { "date": "2026-06-27", "home": "Croydon Reserves", "away": "Heathmont Reserves", "homeGoals": 10, "homeBehinds": 16, "awayGoals": 2, "awayBehinds": 3, "competition": "Div 2 - Reserve Men · Round 11" },
+        { "date": "2026-06-20", "home": "Lilydale Reserves", "away": "Croydon Reserves", "homeGoals": 0, "homeBehinds": 3, "awayGoals": 11, "awayBehinds": 10, "competition": "Div 2 - Reserve Men · Round 10" },
+        { "date": "2026-06-13", "home": "Surrey Park Reserves", "away": "Croydon Reserves", "homeGoals": 7, "homeBehinds": 6, "awayGoals": 7, "awayBehinds": 6, "competition": "Div 2 - Reserve Men · Round 9" },
+        { "date": "2026-05-30", "home": "Croydon Reserves", "away": "Mulgrave Reserves", "homeGoals": 10, "homeBehinds": 6, "awayGoals": 10, "awayBehinds": 4, "competition": "Div 2 - Reserve Men · Round 8" },
+        { "date": "2026-05-23", "home": "Croydon Reserves", "away": "Scoresby Reserves", "homeGoals": 8, "homeBehinds": 10, "awayGoals": 7, "awayBehinds": 2, "competition": "Div 2 - Reserve Men · Round 7" },
+        { "date": "2026-05-16", "home": "Waverley Blues Reserves", "away": "Croydon Reserves", "homeGoals": 6, "homeBehinds": 5, "awayGoals": 10, "awayBehinds": 9, "competition": "Div 2 - Reserve Men · Round 6" },
+        { "date": "2026-05-09", "home": "Ringwood Reserves", "away": "Croydon Reserves", "homeGoals": 7, "homeBehinds": 4, "awayGoals": 14, "awayBehinds": 9, "competition": "Div 2 - Reserve Men · Round 5" },
+        { "date": "2026-05-02", "home": "Croydon Reserves", "away": "Templestowe Reserves", "homeGoals": 9, "homeBehinds": 9, "awayGoals": 4, "awayBehinds": 4, "competition": "Div 2 - Reserve Men · Round 4" },
+        { "date": "2026-04-25", "home": "East Burwood Reserves", "away": "Croydon Reserves", "homeGoals": 8, "homeBehinds": 10, "awayGoals": 12, "awayBehinds": 9, "competition": "Div 2 - Reserve Men · Round 3" },
+        { "date": "2026-04-18", "home": "Heathmont Reserves", "away": "Croydon Reserves", "homeGoals": 3, "homeBehinds": 2, "awayGoals": 14, "awayBehinds": 13, "competition": "Div 2 - Reserve Men · Round 2" },
+        { "date": "2026-04-11", "home": "Croydon Reserves", "away": "Lilydale Reserves", "homeGoals": 9, "homeBehinds": 7, "awayGoals": 3, "awayBehinds": 6, "competition": "Div 2 - Reserve Men · Round 1" }
+      ],
+      "table": [
+        { "pos": 1,  "team": "Croydon Reserves",         "p": 13, "w": 12, "l": 0,  "d": 1, "pf": 0, "pa": 0, "pct": 207.52, "pts": 50 },
+        { "pos": 2,  "team": "Surrey Park Reserves",     "p": 13, "w": 11, "l": 1,  "d": 1, "pf": 0, "pa": 0, "pct": 252.03, "pts": 46 },
+        { "pos": 3,  "team": "Mulgrave Reserves",        "p": 13, "w": 10, "l": 3,  "d": 0, "pf": 0, "pa": 0, "pct": 190.06, "pts": 40 },
+        { "pos": 4,  "team": "East Burwood Reserves",    "p": 13, "w": 8,  "l": 5,  "d": 0, "pf": 0, "pa": 0, "pct": 126.81, "pts": 32 },
+        { "pos": 5,  "team": "Scoresby Reserves",        "p": 13, "w": 8,  "l": 5,  "d": 0, "pf": 0, "pa": 0, "pct": 120.76, "pts": 32 },
+        { "pos": 6,  "team": "Ringwood Reserves",        "p": 13, "w": 4,  "l": 9,  "d": 0, "pf": 0, "pa": 0, "pct": 66.24,  "pts": 16 },
+        { "pos": 7,  "team": "Waverley Blues Reserves",  "p": 13, "w": 4,  "l": 9,  "d": 0, "pf": 0, "pa": 0, "pct": 63.67,  "pts": 16 },
+        { "pos": 8,  "team": "Templestowe Reserves",     "p": 13, "w": 3,  "l": 10, "d": 0, "pf": 0, "pa": 0, "pct": 64.19,  "pts": 12 },
+        { "pos": 9,  "team": "Lilydale Reserves",        "p": 13, "w": 2,  "l": 11, "d": 0, "pf": 0, "pa": 0, "pct": 55.36,  "pts": 8 },
+        { "pos": 10, "team": "Heathmont Reserves",       "p": 13, "w": 2,  "l": 11, "d": 0, "pf": 0, "pa": 0, "pct": 39.51,  "pts": 8 }
+      ]
+    },
+    {
+      "label": "Under 19.5",
+      "code": "football",
+      "fixtures": [
+        { "date": "2026-07-18", "bounce": "10:30", "home": "Croydon U19.5", "away": "Ringwood U19.5", "venue": "Croydon Park Oval", "competition": "Div 2 - U19.5 · Round 14" },
+        { "date": "2026-07-25", "bounce": "10:30", "home": "Croydon U19.5", "away": "Waverley Blues U19.5", "venue": "Croydon Park Oval", "competition": "Div 2 - U19.5 · Round 15" },
+        { "date": "2026-08-01", "bounce": "10:30", "home": "Scoresby U19.5", "away": "Croydon U19.5", "venue": "Scoresby Recreation Reserve", "competition": "Div 2 - U19.5 · Round 16" },
+        { "date": "2026-08-08", "bounce": "10:30", "home": "Mulgrave U19.5", "away": "Croydon U19.5", "venue": "Mulgrave Reserve", "competition": "Div 2 - U19.5 · Round 17" },
+        { "date": "2026-08-15", "bounce": "10:30", "home": "Croydon U19.5", "away": "Surrey Park U19.5", "venue": "Croydon Park Oval", "competition": "Div 2 - U19.5 · Round 18" }
+      ],
+      "results": [
+        { "date": "2026-07-11", "home": "Templestowe U19.5", "away": "Croydon U19.5", "homeGoals": 15, "homeBehinds": 7, "awayGoals": 4, "awayBehinds": 4, "competition": "Div 2 - U19.5 · Round 13" },
+        { "date": "2026-07-04", "home": "Croydon U19.5", "away": "East Burwood U19.5", "homeGoals": 9, "homeBehinds": 10, "awayGoals": 5, "awayBehinds": 6, "competition": "Div 2 - U19.5 · Round 12" },
+        { "date": "2026-06-20", "home": "Lilydale U19.5", "away": "Croydon U19.5", "homeGoals": 5, "homeBehinds": 7, "awayGoals": 8, "awayBehinds": 10, "competition": "Div 2 - U19.5 · Round 10" },
+        { "date": "2026-06-13", "home": "Surrey Park U19.5", "away": "Croydon U19.5", "homeGoals": 10, "homeBehinds": 7, "awayGoals": 3, "awayBehinds": 3, "competition": "Div 2 - U19.5 · Round 9" },
+        { "date": "2026-05-30", "home": "Croydon U19.5", "away": "Mulgrave U19.5", "homeGoals": 9, "homeBehinds": 5, "awayGoals": 8, "awayBehinds": 9, "competition": "Div 2 - U19.5 · Round 8" },
+        { "date": "2026-05-23", "home": "Croydon U19.5", "away": "Scoresby U19.5", "homeGoals": 10, "homeBehinds": 11, "awayGoals": 7, "awayBehinds": 7, "competition": "Div 2 - U19.5 · Round 7" },
+        { "date": "2026-05-16", "home": "Waverley Blues U19.5", "away": "Croydon U19.5", "homeGoals": 9, "homeBehinds": 9, "awayGoals": 6, "awayBehinds": 6, "competition": "Div 2 - U19.5 · Round 6" },
+        { "date": "2026-05-09", "home": "Ringwood U19.5", "away": "Croydon U19.5", "homeGoals": 10, "homeBehinds": 9, "awayGoals": 6, "awayBehinds": 2, "competition": "Div 2 - U19.5 · Round 5" },
+        { "date": "2026-05-02", "home": "Croydon U19.5", "away": "Templestowe U19.5", "homeGoals": 5, "homeBehinds": 6, "awayGoals": 9, "awayBehinds": 9, "competition": "Div 2 - U19.5 · Round 4" },
+        { "date": "2026-04-25", "home": "East Burwood U19.5", "away": "Croydon U19.5", "homeGoals": 5, "homeBehinds": 11, "awayGoals": 13, "awayBehinds": 9, "competition": "Div 2 - U19.5 · Round 3" },
+        { "date": "2026-04-11", "home": "Croydon U19.5", "away": "Lilydale U19.5", "homeGoals": 11, "homeBehinds": 14, "awayGoals": 3, "awayBehinds": 7, "competition": "Div 2 - U19.5 · Round 1" }
+      ],
+      "table": [
+        { "pos": 1, "team": "Ringwood U19.5",       "p": 11, "w": 10, "l": 1,  "d": 0, "pf": 0, "pa": 0, "pct": 252.23, "pts": 40 },
+        { "pos": 2, "team": "Mulgrave U19.5",       "p": 12, "w": 9,  "l": 3,  "d": 0, "pf": 0, "pa": 0, "pct": 160.91, "pts": 36 },
+        { "pos": 3, "team": "Waverley Blues U19.5", "p": 12, "w": 8,  "l": 4,  "d": 0, "pf": 0, "pa": 0, "pct": 140.11, "pts": 32 },
+        { "pos": 4, "team": "Surrey Park U19.5",    "p": 12, "w": 8,  "l": 4,  "d": 0, "pf": 0, "pa": 0, "pct": 122.07, "pts": 32 },
+        { "pos": 5, "team": "Croydon U19.5",        "p": 11, "w": 6,  "l": 5,  "d": 0, "pf": 0, "pa": 0, "pct": 96.69,  "pts": 24 },
+        { "pos": 6, "team": "Templestowe U19.5",    "p": 11, "w": 5,  "l": 6,  "d": 0, "pf": 0, "pa": 0, "pct": 108.49, "pts": 20 },
+        { "pos": 7, "team": "Scoresby U19.5",       "p": 11, "w": 3,  "l": 8,  "d": 0, "pf": 0, "pa": 0, "pct": 69.44,  "pts": 12 },
+        { "pos": 8, "team": "Lilydale U19.5",       "p": 12, "w": 2,  "l": 10, "d": 0, "pf": 0, "pa": 0, "pct": 43.05,  "pts": 8 },
+        { "pos": 9, "team": "East Burwood U19.5",   "p": 12, "w": 1,  "l": 11, "d": 0, "pf": 0, "pa": 0, "pct": 52.48,  "pts": 4 }
+      ]
+    }
+  ]
+}

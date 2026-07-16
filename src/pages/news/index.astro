@@ -1,0 +1,133 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const newsPosts = (await getCollection('news', ({ data }) => !data.draft))
+  .sort((a, b) => +b.data.date - +a.data.date);
+
+const allEvents = (await getCollection('events', ({ data }) => !data.draft))
+  .sort((a, b) => +b.data.date - +a.data.date);
+
+const featured = newsPosts[0] ?? null;
+const moreNews = newsPosts.slice(1);
+
+const formatDate = (d: Date) =>
+  d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+---
+<BaseLayout title="Latest · Croydon FNC">
+  <section class="max-w-6xl mx-auto px-4 py-12">
+    <div class="mb-8">
+      <div class="text-xs uppercase tracking-[0.3em] text-club-secondary">Latest from the club</div>
+      <h1 class="font-display text-4xl lg:text-5xl text-club-primary tracking-wide">LATEST</h1>
+    </div>
+
+    {newsPosts.length === 0 && allEvents.length === 0 && (
+      <p class="text-slate-500">No articles yet. Check back soon.</p>
+    )}
+
+    {/* FEATURED NEWS HERO */}
+    {featured && (
+      <a
+        href={`/news/${featured.slug}`}
+        class="group block relative overflow-hidden rounded-lg bg-club-primary text-white shadow-lg min-h-[380px] lg:min-h-[460px]"
+      >
+        {featured.data.hero?.src ? (
+          <img
+            src={featured.data.hero.src}
+            alt=""
+            class="absolute inset-0 w-full h-full object-contain object-center p-0 group-hover:scale-[1.02] transition duration-500"
+            loading="eager"
+            decoding="async"
+            fetchpriority="high"
+          />
+        ) : (
+          <div class="pointer-events-none absolute -left-20 -bottom-20 opacity-[0.06]">
+            <div class="text-[26rem] font-display leading-none">CFNC</div>
+          </div>
+        )}
+        <div class="absolute inset-0 bg-gradient-to-t from-club-dark via-club-dark/60 to-transparent"></div>
+
+        <div class="relative h-full min-h-[380px] lg:min-h-[460px] p-6 lg:p-10 flex flex-col justify-end">
+          <div class="inline-flex w-fit items-center gap-2 bg-club-secondary text-white px-3 py-1 rounded text-[11px] font-bold uppercase tracking-[0.25em] mb-5">
+            Featured · {featured.data.category}
+          </div>
+          <h2 class="font-display text-3xl sm:text-4xl lg:text-5xl xl:text-6xl tracking-wide leading-[0.95] max-w-4xl group-hover:text-club-secondary transition">
+            {featured.data.title}
+          </h2>
+          {featured.data.summary && (
+            <p class="mt-4 text-white/85 text-base lg:text-lg max-w-3xl leading-relaxed line-clamp-2">
+              {featured.data.summary}
+            </p>
+          )}
+          <div class="mt-6 flex flex-wrap items-center gap-x-5 gap-y-1 text-[11px] uppercase tracking-[0.25em] text-white/70">
+            <span class="text-white font-semibold">By {featured.data.author}</span>
+            <span>{formatDate(featured.data.date)}</span>
+          </div>
+        </div>
+      </a>
+    )}
+
+    {/* MORE NEWS (if any) */}
+    {moreNews.length > 0 && (
+      <div class="mt-10">
+        <h2 class="font-display text-3xl text-club-primary tracking-wide mb-5">NEWS</h2>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {moreNews.map((post) => (
+            <a href={`/news/${post.slug}`} class="group bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden hover:shadow-lg transition flex flex-col">
+              <div class="relative aspect-[16/10] bg-club-primary overflow-hidden">
+                {post.data.hero?.src ? (
+                  <img src={post.data.hero.src} alt="" class="absolute inset-0 w-full h-full object-contain object-center group-hover:scale-105 transition duration-500" loading="lazy" decoding="async" />
+                ) : (
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="font-display text-[8rem] leading-none text-white/10">CFNC</div>
+                  </div>
+                )}
+                <div class="absolute top-3 left-3 bg-club-secondary text-white text-[10px] font-bold uppercase tracking-[0.2em] px-2 py-1 rounded">
+                  {post.data.category}
+                </div>
+              </div>
+              <div class="p-5 flex-1 flex flex-col">
+                <div class="text-[11px] uppercase tracking-[0.2em] text-slate-500">{formatDate(post.data.date)} · {post.data.author}</div>
+                <h3 class="font-display text-xl text-club-primary mt-1 tracking-wide leading-tight group-hover:text-club-secondary transition">{post.data.title}</h3>
+                {post.data.summary && <p class="mt-2 text-sm text-slate-600 line-clamp-3">{post.data.summary}</p>}
+                <div class="mt-auto pt-4 text-xs font-semibold uppercase tracking-widest text-club-primary group-hover:text-club-secondary transition">Read article →</div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {/* EVENTS SECTION */}
+    {allEvents.length > 0 && (
+      <div class="mt-12">
+        <div class="flex items-baseline justify-between mb-5">
+          <h2 class="font-display text-3xl text-club-primary tracking-wide">EVENTS</h2>
+          <a href="/events" class="hidden sm:inline text-sm font-semibold text-club-primary hover:text-club-secondary">All events →</a>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {allEvents.map((e) => (
+            <a href={`/events/${e.slug}`} class="group bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden hover:shadow-lg transition flex flex-col">
+              <div class="relative aspect-[4/5] bg-club-primary overflow-hidden flex items-center justify-center">
+                {e.data.hero ? (
+                  <img src={e.data.hero} alt="" class="absolute inset-0 w-full h-full object-contain object-center group-hover:scale-105 transition duration-500" loading="lazy" decoding="async" />
+                ) : (
+                  <div class="font-display text-[8rem] leading-none text-white/10">CFNC</div>
+                )}
+                <div class="absolute top-3 left-3 bg-club-secondary text-white text-[10px] font-bold uppercase tracking-[0.2em] px-2 py-1 rounded z-10">
+                  {e.data.category}
+                </div>
+              </div>
+              <div class="p-5 flex-1 flex flex-col">
+                <div class="text-[11px] uppercase tracking-[0.2em] text-slate-500">{formatDate(e.data.date)}</div>
+                <h3 class="font-display text-xl text-club-primary mt-1 tracking-wide leading-tight group-hover:text-club-secondary transition">{e.data.title}</h3>
+                {e.data.summary && <p class="mt-2 text-sm text-slate-600 line-clamp-3">{e.data.summary}</p>}
+                <div class="mt-auto pt-4 text-xs font-semibold uppercase tracking-widest text-club-primary group-hover:text-club-secondary transition">View event →</div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
+  </section>
+</BaseLayout>

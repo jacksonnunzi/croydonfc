@@ -1,0 +1,254 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import FixtureCard from '../components/FixtureCard.astro';
+import MatchCard from '../components/MatchCard.astro';
+import CodeTabs from '../components/CodeTabs.astro';
+import { loadFixtures, type SportCode, type TeamData, type Fixture, type Result } from '../lib/fixtures';
+import { roundOf } from '../lib/clubs';
+
+const data = await loadFixtures();
+const codes: SportCode[] = ['football', 'netball'];
+const byCode = (c: SportCode): TeamData[] => data.teams.filter((t) => t.code === c);
+const footballTeams = byCode('football');
+
+const today = new Date().toISOString().slice(0, 10);
+
+// Build a per-team map: round number -> { kind, data }
+type RoundEntry =
+  | { kind: 'result'; data: Result }
+  | { kind: 'fixture'; data: Fixture };
+const roundsByTeam: Array<Map<number, RoundEntry>> = footballTeams.map((team) => {
+  const map = new Map<number, RoundEntry>();
+  team.results.forEach((r) => {
+    const n = roundOf(r.competition);
+    if (n) map.set(n, { kind: 'result', data: r });
+  });
+  team.fixtures.forEach((f) => {
+    const n = roundOf(f.competition);
+    if (n) map.set(n, { kind: 'fixture', data: f });
+  });
+  return map;
+});
+
+// Round count - max round number seen across all teams, capped at 18
+const allRounds = new Set<number>();
+roundsByTeam.forEach((m) => m.forEach((_, k) => allRounds.add(k)));
+const maxRound = Math.max(18, ...Array.from(allRounds));
+const roundList = Array.from({ length: maxRound }, (_, i) => i + 1);
+
+// Default round: earliest upcoming across all teams, else latest result round, else 1
+let defaultRound = 1;
+const earliestUpcoming = footballTeams
+  .flatMap((t) => t.fixtures)
+  .filter((f) => f.date >= today)
+  .sort((a, b) => (a.date < b.date ? -1 : 1))[0];
+if (earliestUpcoming) {
+  const n = roundOf(earliestUpcoming.competition);
+  if (n) defaultRound = n;
+} else {
+  const latestResult = footballTeams
+    .flatMap((t) => t.results)
+    .sort((a, b) => (a.date < b.date ? 1 : -1))[0];
+  if (latestResult) {
+    const n = roundOf(latestResult.competition);
+    if (n) defaultRound = n;
+  }
+}
+---
+<BaseLayout title="Fixture · Croydon FNC">
+  <section class="max-w-6xl mx-auto px-4 py-12">
+    <h1 class="font-display text-4xl text-club-primary mb-6">Fixture</h1>
+
+    <CodeTabs />
+
+    {codes.map((code) => {
+      const teams = byCode(code);
+      return (
+        <div data-code={code} style={code === 'football' ? '' : 'display:none'}>
+          {teams.length === 0 ? (
+            <p class="text-slate-500 mb-8">No {code} fixtures yet. They'll appear here once published.</p>
+          ) : code === 'football' ? (
+            <div>
+              {/* ROUND SCROLLER */}
+              <div class="round-tabs -mx-4 px-4 mb-6 overflow-x-auto scrollbar-thin" role="tablist" aria-label="Round selector">
+                <div class="flex gap-2 whitespace-nowrap pb-2 justify-center min-w-max mx-auto">
+                  {roundList.map((r) => {
+                    const active = r === defaultRound;
+                    return (
+                      <button
+                        type="button"
+                        data-tab={String(r)}
+                        role="tab"
+                        aria-selected={active}
+                        class:list={[
+                          'shrink-0 px-4 py-2 rounded-full border text-sm font-semibold transition uppercase tracking-wide',
+                          active
+                            ? 'bg-club-primary text-white border-club-primary'
+                            : 'bg-white text-slate-600 border-slate-300 hover:border-club-primary hover:text-club-primary',
+                        ]}
+                      >{r}</button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* ROUND PANELS */}
+              {roundList.map((r) => (
+                <div data-round={String(r)} style={r === defaultRound ? '' : 'display:none'}>
+                  <div class="flex flex-col gap-5 max-w-2xl mx-auto">
+                    {footballTeams.map((team, i) => {
+                      const entry = roundsByTeam[i].get(r);
+                      if (!entry) {
+                        return (
+                          <MatchCard
+                            teamLabel={team.label}
+                            round={r}
+                            bye={true}
+                          />
+                        );
+                      }
+                      if (entry.kind === 'result') {
+                        const res = entry.data;
+                        return (
+                          <MatchCard
+                            teamLabel={team.label}
+                            round={r}
+                            date={res.date}
+                            home={res.home}
+                            away={res.away}
+                            homeGoals={res.homeGoals}
+                            homeBehinds={res.homeBehinds}
+                            awayGoals={res.awayGoals}
+                            awayBehinds={res.awayBehinds}
+                          />
+                        );
+                      }
+                      const fx = entry.data;
+                      return (
+                        <MatchCard
+                          teamLabel={team.label}
+                          round={r}
+                          date={fx.date}
+                          bounce={fx.bounce}
+                          venue={fx.venue}
+                          home={fx.home}
+                          away={fx.away}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            teams.map((team) => (
+              <div class="mb-14">
+                <h2 class="font-display text-3xl text-club-primary mb-4">{team.label}</h2>
+
+                <h3 class="font-display text-xl text-slate-700 mb-3">Upcoming</h3>
+                {team.fixtures.length === 0 ? (
+                  <p class="text-slate-500 mb-6">No upcoming fixtures.</p>
+                ) : (
+                  <div class="grid sm:grid-cols-2 gap-4 mb-6">
+                    {team.fixtures.map((f) => <FixtureCard fixture={f} />)}
+                  </div>
+                )}
+
+                <h3 class="font-display text-xl text-slate-700 mb-3">Ladder</h3>
+                {team.table.length === 0 ? (
+                  <p class="text-slate-500">Ladder not yet available.</p>
+                ) : (
+                  <div class="overflow-x-auto bg-white rounded-lg border border-slate-200 shadow-sm">
+                    <table class="min-w-full text-sm">
+                      <thead class="bg-club-primary text-white">
+                        <tr>
+                          <th class="px-3 py-2 text-left">#</th>
+                          <th class="px-3 py-2 text-left">Team</th>
+                          <th class="px-3 py-2">P</th><th class="px-3 py-2">W</th><th class="px-3 py-2">L</th><th class="px-3 py-2">D</th>
+                          <th class="px-3 py-2">PF</th><th class="px-3 py-2">PA</th><th class="px-3 py-2">%</th><th class="px-3 py-2">Pts</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {team.table.map((row) => (
+                          <tr class:list={['border-t border-slate-100', /croydon/i.test(row.team) && 'bg-club-primary/10 font-semibold']}>
+                            <td class="px-3 py-2">{row.pos}</td>
+                            <td class="px-3 py-2">{row.team}</td>
+                            <td class="px-3 py-2 text-center">{row.p}</td>
+                            <td class="px-3 py-2 text-center">{row.w}</td>
+                            <td class="px-3 py-2 text-center">{row.l}</td>
+                            <td class="px-3 py-2 text-center">{row.d}</td>
+                            <td class="px-3 py-2 text-center">{row.pf}</td>
+                            <td class="px-3 py-2 text-center">{row.pa}</td>
+                            <td class="px-3 py-2 text-center">{row.pct.toFixed(1)}</td>
+                            <td class="px-3 py-2 text-center">{row.pts}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+      );
+    })}
+
+    {data.updated && <p class="text-xs text-slate-500 mt-6">Updated {data.updated}</p>}
+
+    <div class="bg-club-primary/5 border border-club-primary/20 rounded-lg p-5 mt-10">
+      <p class="text-slate-700 mb-3">Live fixtures, results and the ladder are also available on PlayHQ:</p>
+      <div class="flex flex-wrap gap-3">
+        <a href="https://www.playhq.com/afl/org/croydon-eastern-football-netball-league/1dda6c4e" target="_blank" rel="noopener" class="bg-club-primary text-white px-4 py-2 rounded font-semibold hover:opacity-90 inline-flex items-center gap-2">
+          View on PlayHQ
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  // Wire round tabs: each .round-tabs toggles sibling [data-round] panels in its parent.
+  document.querySelectorAll<HTMLElement>('.round-tabs').forEach((tabs) => {
+    const parent = tabs.parentElement;
+    if (!parent) return;
+    const buttons = tabs.querySelectorAll<HTMLButtonElement>('button[data-tab]');
+    const panels = Array.from(parent.children).filter((el): el is HTMLElement =>
+      el instanceof HTMLElement && el.hasAttribute('data-round')
+    );
+    const scrollActiveIntoView = (btn: HTMLButtonElement, smooth = true) => {
+      const container = tabs;
+      const btnCenter = btn.offsetLeft + btn.offsetWidth / 2;
+      const target = btnCenter - container.clientWidth / 2;
+      container.scrollTo({ left: target, behavior: smooth ? 'smooth' : 'auto' });
+    };
+    const apply = (key: string, smooth = true) => {
+      buttons.forEach((b) => {
+        const on = b.dataset.tab === key;
+        b.setAttribute('aria-selected', String(on));
+        if (on) {
+          b.classList.remove('bg-white', 'text-slate-600', 'border-slate-300');
+          b.classList.add('bg-club-primary', 'text-white', 'border-club-primary');
+        } else {
+          b.classList.add('bg-white', 'text-slate-600', 'border-slate-300');
+          b.classList.remove('bg-club-primary', 'text-white', 'border-club-primary');
+        }
+      });
+      panels.forEach((el) => {
+        el.style.display = el.getAttribute('data-round') === key ? '' : 'none';
+      });
+    };
+    buttons.forEach((b) =>
+      b.addEventListener('click', () => {
+        apply(b.dataset.tab!);
+        scrollActiveIntoView(b);
+      })
+    );
+    // On initial load, jump (no animation) to center the currently-selected round button
+    const initial = tabs.querySelector<HTMLButtonElement>('button[aria-selected="true"]');
+    if (initial) {
+      requestAnimationFrame(() => scrollActiveIntoView(initial, false));
+    }
+  });
+</script>

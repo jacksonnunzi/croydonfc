@@ -1,0 +1,145 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const all = (await getCollection('events', ({ data }) => !data.draft))
+  .sort((a, b) => +a.data.date - +b.data.date);
+
+const now = new Date();
+const upcoming = all.filter((e) => (e.data.endDate ?? e.data.date) >= now);
+const past = all
+  .filter((e) => (e.data.endDate ?? e.data.date) < now)
+  .sort((a, b) => +b.data.date - +a.data.date);
+
+const featured = upcoming[0];
+const otherUpcoming = upcoming.slice(1);
+
+const longDate = (d: Date) =>
+  d.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+const shortDate = (d: Date) =>
+  d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+const dayNum = (d: Date) => d.getDate();
+const monthShort = (d: Date) => d.toLocaleDateString('en-AU', { month: 'short' }).toUpperCase();
+---
+<BaseLayout title="Events · Croydon FNC" description="Upcoming Croydon FNC events, functions, fundraisers, training camps and more.">
+  <section class="max-w-6xl mx-auto px-4 py-12">
+    <div class="mb-8">
+      <div class="text-xs uppercase tracking-[0.3em] text-club-secondary">What's on at the Blues</div>
+      <h1 class="font-display text-4xl lg:text-5xl text-club-primary tracking-wide">EVENTS</h1>
+    </div>
+
+    {upcoming.length === 0 && past.length === 0 ? (
+      <p class="text-slate-500">No events listed yet. Check back soon.</p>
+    ) : (
+      <div>
+        {/* FEATURED UPCOMING EVENT */}
+        {featured && (
+          <a
+            href={`/events/${featured.slug}`}
+            class="group block relative overflow-hidden rounded-lg bg-club-primary text-white shadow-lg min-h-[380px] lg:min-h-[460px]"
+          >
+            {featured.data.hero ? (
+              <img
+                src={featured.data.hero}
+                alt=""
+                class="absolute inset-0 w-full h-full object-contain object-center opacity-80 group-hover:opacity-90 group-hover:scale-[1.02] transition duration-500"
+                loading="eager"
+                decoding="async"
+                fetchpriority="high"
+              />
+            ) : (
+              <div class="pointer-events-none absolute -left-20 -bottom-20 opacity-[0.06]">
+                <div class="text-[26rem] font-display leading-none">CFNC</div>
+              </div>
+            )}
+            <div class="absolute inset-0 bg-gradient-to-t from-club-dark via-club-dark/60 to-transparent"></div>
+
+            <div class="relative h-full min-h-[380px] lg:min-h-[460px] p-6 lg:p-10 flex flex-col justify-end">
+              <div class="inline-flex w-fit items-center gap-2 bg-club-secondary text-white px-3 py-1 rounded text-[11px] font-bold uppercase tracking-[0.25em] mb-5">
+                Next up · {featured.data.category}
+              </div>
+              <h2 class="font-display text-3xl sm:text-4xl lg:text-5xl xl:text-6xl tracking-wide leading-[0.95] max-w-4xl group-hover:text-club-secondary transition">
+                {featured.data.title}
+              </h2>
+              {featured.data.summary && (
+                <p class="mt-4 text-white/85 text-base lg:text-lg max-w-3xl leading-relaxed line-clamp-2">
+                  {featured.data.summary}
+                </p>
+              )}
+              <div class="mt-6 space-y-1 text-[11px] uppercase tracking-[0.25em] text-white/80">
+                <div><span class="text-club-secondary font-bold">When · </span><span class="text-white font-semibold">{longDate(featured.data.date)}</span></div>
+                {featured.data.time && <div><span class="text-club-secondary font-bold">Time · </span><span class="text-white">{featured.data.time}</span></div>}
+                {featured.data.location && <div><span class="text-club-secondary font-bold">Where · </span><span class="text-white">{featured.data.location}</span></div>}
+              </div>
+              <div class="mt-6">
+                <span class="inline-flex items-center gap-2 bg-white text-club-primary px-5 py-2 rounded font-semibold text-sm group-hover:bg-club-secondary group-hover:text-white transition">
+                  View details →
+                </span>
+              </div>
+            </div>
+          </a>
+        )}
+
+        {/* OTHER UPCOMING EVENTS */}
+        {otherUpcoming.length > 0 && (
+          <div class="mt-12">
+            <h2 class="font-display text-3xl text-club-primary tracking-wide mb-5">ALSO COMING UP</h2>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {otherUpcoming.map((e) => (
+                <a href={`/events/${e.slug}`} class="group bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden hover:shadow-lg transition flex flex-col">
+                  <div class="relative aspect-[4/5] bg-club-primary overflow-hidden flex items-center justify-center">
+                    {e.data.hero ? (
+                      <img src={e.data.hero} alt="" class="absolute inset-0 w-full h-full object-contain object-center group-hover:scale-105 transition duration-500" loading="lazy" decoding="async" />
+                    ) : (
+                      <div class="font-display text-[8rem] leading-none text-white/10">CFNC</div>
+                    )}
+                    <div class="absolute top-3 left-3 bg-club-secondary text-white text-[10px] font-bold uppercase tracking-[0.2em] px-2 py-1 rounded z-10">
+                      {e.data.category}
+                    </div>
+                  </div>
+                  <div class="p-5 flex-1 flex flex-col">
+                    <div class="text-[11px] uppercase tracking-[0.2em] text-slate-500">{shortDate(e.data.date)}{e.data.time && ` · ${e.data.time}`}</div>
+                    <h3 class="font-display text-xl text-club-primary mt-1 tracking-wide leading-tight group-hover:text-club-secondary transition">{e.data.title}</h3>
+                    {e.data.summary && <p class="mt-2 text-sm text-slate-600 line-clamp-3">{e.data.summary}</p>}
+                    {e.data.location && <div class="mt-2 text-[11px] text-slate-500">📍 {e.data.location}</div>}
+                    <div class="mt-auto pt-4 text-xs font-semibold uppercase tracking-widest text-club-primary group-hover:text-club-secondary transition">View event →</div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* PAST EVENTS */}
+        {past.length > 0 && (
+          <div class="mt-14">
+            <h2 class="font-display text-3xl text-club-primary tracking-wide mb-5">PAST EVENTS</h2>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {past.map((e) => (
+                <a href={`/events/${e.slug}`} class="group bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden hover:shadow-lg transition flex flex-col">
+                  <div class="relative aspect-[4/5] bg-club-primary overflow-hidden flex items-center justify-center">
+                    {e.data.hero ? (
+                      <img src={e.data.hero} alt="" class="absolute inset-0 w-full h-full object-contain object-center group-hover:scale-105 transition duration-500" loading="lazy" decoding="async" />
+                    ) : (
+                      <div class="font-display text-[8rem] leading-none text-white/10">CFNC</div>
+                    )}
+                    <div class="absolute top-3 left-3 bg-club-secondary text-white text-[10px] font-bold uppercase tracking-[0.2em] px-2 py-1 rounded z-10">
+                      {e.data.category}
+                    </div>
+                  </div>
+                  <div class="p-5 flex-1 flex flex-col">
+                    <div class="text-[11px] uppercase tracking-[0.2em] text-slate-500">{shortDate(e.data.date)}{e.data.time && ` · ${e.data.time}`}</div>
+                    <h3 class="font-display text-xl text-club-primary mt-1 tracking-wide leading-tight group-hover:text-club-secondary transition">{e.data.title}</h3>
+                    {e.data.summary && <p class="mt-2 text-sm text-slate-600 line-clamp-3">{e.data.summary}</p>}
+                    {e.data.location && <div class="mt-2 text-[11px] text-slate-500">📍 {e.data.location}</div>}
+                    <div class="mt-auto pt-4 text-xs font-semibold uppercase tracking-widest text-club-primary group-hover:text-club-secondary transition">View event →</div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    )}
+  </section>
+</BaseLayout>

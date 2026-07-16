@@ -1,0 +1,30 @@
+---
+interface Props {
+  name: string;
+  position: string;
+  number?: number;
+  joined?: string;
+  stats?: { games: number; goals: number };
+}
+const { name, position, number, joined, stats } = Astro.props;
+---
+<div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+  <div class="bg-club-primary text-white p-4 flex items-center justify-between">
+    <div>
+      <div class="font-display text-xl">{name}</div>
+      <div class="text-xs uppercase text-white/70">{position}</div>
+    </div>
+    {number !== undefined && (
+      <div class="font-display text-4xl text-club-secondary">{number}</div>
+    )}
+  </div>
+  <div class="p-4 text-sm text-slate-600">
+    {joined && <div>Joined: <span class="font-medium text-slate-800">{joined}</span></div>}
+    {stats && (
+      <div class="grid grid-cols-2 gap-2 mt-3 text-center">
+        <div><div class="font-display text-lg text-club-primary">{stats.games}</div><div class="text-xs">Games</div></div>
+        <div><div class="font-display text-lg text-club-primary">{stats.goals}</div><div class="text-xs">Goals</div></div>
+      </div>
+    )}
+  </div>
+</div>

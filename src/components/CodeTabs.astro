@@ -1,0 +1,36 @@
+---
+// Football / Netball tab switcher.
+// Renders two buttons that toggle visibility of [data-code="football"|"netball"] panels
+// within the same parent container. Pure JS, no framework.
+interface Props {
+  active?: 'football' | 'netball';
+}
+const { active = 'football' } = Astro.props;
+---
+<div class="code-tabs flex gap-2 border-b border-slate-200 mb-6" role="tablist">
+  <button type="button" data-tab="football" class:list={['px-5 py-2 font-display tracking-wide border-b-2 transition', active === 'football' ? 'border-club-primary text-club-primary' : 'border-transparent text-slate-500 hover:text-club-primary']} role="tab" aria-selected={active === 'football'}>Football</button>
+  <button type="button" data-tab="netball" class:list={['px-5 py-2 font-display tracking-wide border-b-2 transition', active === 'netball' ? 'border-club-primary text-club-primary' : 'border-transparent text-slate-500 hover:text-club-primary']} role="tab" aria-selected={active === 'netball'}>Netball</button>
+</div>
+
+<script>
+  // Wire up tabs: each .code-tabs controls sibling [data-code] panels in its parent.
+  document.querySelectorAll<HTMLElement>('.code-tabs').forEach((tabs) => {
+    const parent = tabs.parentElement;
+    if (!parent) return;
+    const buttons = tabs.querySelectorAll<HTMLButtonElement>('button[data-tab]');
+    const apply = (code: string) => {
+      buttons.forEach((b) => {
+        const on = b.dataset.tab === code;
+        b.setAttribute('aria-selected', String(on));
+        b.classList.toggle('border-club-primary', on);
+        b.classList.toggle('text-club-primary', on);
+        b.classList.toggle('border-transparent', !on);
+        b.classList.toggle('text-slate-500', !on);
+      });
+      parent.querySelectorAll<HTMLElement>('[data-code]').forEach((el) => {
+        el.style.display = el.dataset.code === code ? '' : 'none';
+      });
+    };
+    buttons.forEach((b) => b.addEventListener('click', () => apply(b.dataset.tab!)));
+  });
+</script>

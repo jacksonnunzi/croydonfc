@@ -1,0 +1,62 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PlayerCard from '../components/PlayerCard.astro';
+import CodeTabs from '../components/CodeTabs.astro';
+import { getCollection } from 'astro:content';
+
+const players = await getCollection('players');
+const football = players.filter((p) => (p.data.code ?? 'football') === 'football');
+const netball = players.filter((p) => p.data.code === 'netball');
+const order = ['Coach', 'Assistant Coach', 'Forward', 'Midfielder', 'Ruck', 'Defender', 'Utility'];
+const sortPlayers = (list: typeof players) =>
+  [...list].sort((a, b) => {
+    const ai = order.indexOf(a.data.position);
+    const bi = order.indexOf(b.data.position);
+    if (ai !== bi) return ai - bi;
+    return (a.data.number ?? 99) - (b.data.number ?? 99);
+  });
+---
+<BaseLayout title="Players · Croydon FNC">
+  <section class="max-w-6xl mx-auto px-4 py-12">
+    <h1 class="font-display text-4xl text-club-primary mb-2">Players</h1>
+    <p class="text-slate-600 mb-6">Meet the Blues' playing groups.</p>
+
+    <CodeTabs />
+
+    <div data-code="football">
+      {football.length === 0 ? (
+        <p class="text-slate-500">Football player profiles will be added here soon.</p>
+      ) : (
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {sortPlayers(football).map((p) => (
+            <PlayerCard
+              name={p.data.name}
+              position={p.data.position}
+              number={p.data.number}
+              joined={p.data.joined}
+              stats={p.data.stats}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+
+    <div data-code="netball" style="display:none">
+      {netball.length === 0 ? (
+        <p class="text-slate-500">Netball player profiles will be added here soon.</p>
+      ) : (
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {sortPlayers(netball).map((p) => (
+            <PlayerCard
+              name={p.data.name}
+              position={p.data.position}
+              number={p.data.number}
+              joined={p.data.joined}
+              stats={p.data.stats}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  </section>
+</BaseLayout>

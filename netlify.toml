@@ -1,0 +1,12 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Decap CMS lives at /admin (static)
+[[redirects]]
+  from = "/admin"
+  to = "/admin/index.html"
+  status = 200

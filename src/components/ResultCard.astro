@@ -1,0 +1,25 @@
+---
+import { totalPoints, type Result } from '../lib/fixtures';
+interface Props { result: Result; }
+const { result } = Astro.props;
+const d = new Date(result.date);
+const dateStr = d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+const homePts = totalPoints(result.homeGoals, result.homeBehinds);
+const awayPts = totalPoints(result.awayGoals, result.awayBehinds);
+const homeWin = homePts > awayPts;
+const awayWin = awayPts > homePts;
+---
+<div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4">
+  <div class="text-xs uppercase tracking-wider text-slate-500 mb-3">{result.competition ?? 'Match'} · {dateStr}</div>
+  <div class="grid grid-cols-3 items-center gap-3">
+    <div class:list={['text-right', homeWin && 'font-bold text-club-primary']}>
+      <div>{result.home}</div>
+      <div class="font-display text-2xl">{result.homeGoals}.{result.homeBehinds} <span class="text-base text-slate-500">({homePts})</span></div>
+    </div>
+    <div class="text-center text-slate-500">v</div>
+    <div class:list={['text-left', awayWin && 'font-bold text-club-primary']}>
+      <div>{result.away}</div>
+      <div class="font-display text-2xl">{result.awayGoals}.{result.awayBehinds} <span class="text-base text-slate-500">({awayPts})</span></div>
+    </div>
+  </div>
+</div>

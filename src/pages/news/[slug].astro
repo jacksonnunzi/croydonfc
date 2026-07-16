@@ -1,0 +1,162 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection, type CollectionEntry } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('news', ({ data }) => !data.draft);
+  return posts.map((post) => ({ params: { slug: post.slug }, props: { post } }));
+}
+
+interface Props { post: CollectionEntry<'news'>; }
+const { post } = Astro.props;
+const { Content, remarkPluginFrontmatter } = await post.render();
+
+// Rough read-time estimate from the raw markdown body
+const words = post.body.trim().split(/\s+/).length;
+const readMinutes = Math.max(1, Math.round(words / 220));
+
+const longDate = post.data.date.toLocaleDateString('en-AU', {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+
+// Related posts (same category, exclude current, 3 newest)
+const all = await getCollection('news', ({ data }) => !data.draft);
+const related = all
+  .filter((p) => p.slug !== post.slug && p.data.category === post.data.category)
+  .sort((a, b) => +b.data.date - +a.data.date)
+  .slice(0, 3);
+
+const heroSrc = post.data.hero?.src;
+---
+<BaseLayout title={`${post.data.title} · Croydon FNC`} description={post.data.summary}>
+  {/* HERO */}
+  <section class="relative overflow-hidden bg-club-primary text-white">
+    {heroSrc ? (
+      <img
+        src={heroSrc}
+        alt=""
+        class="absolute inset-0 w-full h-full object-cover opacity-60"
+        loading="eager"
+        decoding="async"
+        fetchpriority="high"
+      />
+    ) : (
+      <div class="pointer-events-none absolute -left-20 -bottom-20 opacity-[0.06]">
+        <div class="text-[26rem] font-display leading-none">CFNC</div>
+      </div>
+    )}
+    {/* Dark gradient for legibility over photos */}
+    <div class="absolute inset-0 bg-gradient-to-t from-club-dark via-club-dark/70 to-club-primary/30"></div>
+
+    <div class="relative max-w-5xl mx-auto px-4 pt-12 pb-14 lg:pt-20 lg:pb-20">
+      <a href="/news" class="inline-flex items-center gap-1 text-xs uppercase tracking-[0.25em] text-white/70 hover:text-white">
+        ← Back to Latest
+      </a>
+
+      <div class="mt-8 inline-flex items-center gap-2 bg-club-secondary/90 text-white px-3 py-1 rounded text-[11px] font-bold uppercase tracking-[0.25em]">
+        {post.data.category}
+      </div>
+
+      <h1 class="font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl text-white tracking-wide mt-5 leading-[0.95] max-w-4xl">
+        {post.data.title}
+      </h1>
+
+      {post.data.summary && (
+        <p class="mt-5 text-white/85 text-lg lg:text-xl max-w-3xl leading-relaxed">
+          {post.data.summary}
+        </p>
+      )}
+
+      <dl class="mt-10 grid sm:grid-cols-[max-content_1fr] gap-x-8 gap-y-3 text-sm max-w-2xl">
+        <dt class="text-[10px] uppercase tracking-[0.25em] text-club-secondary font-bold self-center">Author</dt>
+        <dd class="text-white font-semibold">{post.data.author}</dd>
+
+        <dt class="text-[10px] uppercase tracking-[0.25em] text-club-secondary font-bold self-center">Published</dt>
+        <dd class="text-white">{longDate}</dd>
+
+        <dt class="text-[10px] uppercase tracking-[0.25em] text-club-secondary font-bold self-center">Read time</dt>
+        <dd class="text-white">{readMinutes} min</dd>
+      </dl>
+    </div>
+  </section>
+
+  {/* ARTICLE BODY */}
+  <article class="max-w-3xl mx-auto px-4 py-12 lg:py-16">
+    <div class="article-body prose prose-slate prose-lg max-w-none
+      prose-headings:font-display prose-headings:text-club-primary prose-headings:tracking-wide
+      prose-h2:text-3xl prose-h2:mt-10 prose-h2:mb-4 prose-h2:border-l-4 prose-h2:border-club-secondary prose-h2:pl-4
+      prose-h3:text-xl prose-h3:text-club-primary
+      prose-p:text-slate-700 prose-p:leading-relaxed
+      prose-a:text-club-primary prose-a:font-semibold hover:prose-a:text-club-secondary
+      prose-strong:text-club-primary
+      prose-ul:text-slate-700 prose-li:marker:text-club-secondary
+      prose-blockquote:border-club-secondary prose-blockquote:text-club-primary prose-blockquote:font-display prose-blockquote:not-italic">
+      <Content />
+    </div>
+
+    <div class="mt-12 pt-6 border-t border-slate-200 flex flex-wrap items-center justify-between gap-4">
+      <a href="/news" class="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-club-primary hover:text-club-secondary">
+        ← Back to Latest
+      </a>
+      <div class="text-xs uppercase tracking-[0.25em] text-slate-500">
+        Up the Blues
+      </div>
+    </div>
+  </article>
+
+  {/* RELATED */}
+  {related.length > 0 && (
+    <section class="bg-slate-100 border-t border-slate-200">
+      <div class="max-w-6xl mx-auto px-4 py-14">
+        <div class="flex items-baseline justify-between mb-6">
+          <div>
+            <div class="text-xs uppercase tracking-[0.3em] text-club-secondary">More like this</div>
+            <h2 class="font-display text-3xl lg:text-4xl text-club-primary tracking-wide">{post.data.category.toUpperCase()}</h2>
+          </div>
+          <a href="/news" class="hidden sm:inline text-sm font-semibold text-club-primary hover:text-club-secondary">All articles →</a>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {related.map((p) => (
+            <a href={`/news/${p.slug}`} class="group bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden hover:shadow-lg transition block">
+              <div class="relative aspect-[16/10] bg-club-primary overflow-hidden">
+                {p.data.hero?.src ? (
+                  <img src={p.data.hero.src} alt="" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" decoding="async" />
+                ) : (
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="font-display text-[8rem] leading-none text-white/10">CFNC</div>
+                  </div>
+                )}
+                <div class="absolute top-3 left-3 bg-club-secondary text-white text-[10px] font-bold uppercase tracking-[0.2em] px-2 py-1 rounded">
+                  {p.data.category}
+                </div>
+              </div>
+              <div class="p-5">
+                <div class="text-[11px] uppercase tracking-[0.2em] text-slate-500">
+                  {p.data.date.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </div>
+                <h3 class="font-display text-xl text-club-primary mt-1 tracking-wide leading-tight group-hover:text-club-secondary transition">{p.data.title}</h3>
+                {p.data.summary && <p class="mt-2 text-sm text-slate-600 line-clamp-2">{p.data.summary}</p>}
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <style>
+    /* Drop cap on the first paragraph of the article body, AFL-article style */
+    .article-body > p:first-of-type::first-letter {
+      font-family: 'Bebas Neue', system-ui, sans-serif;
+      font-size: 4.5rem;
+      line-height: 0.85;
+      color: #0a1f5c;
+      float: left;
+      margin: 0.35rem 0.65rem 0 0;
+      padding: 0;
+    }
+  </style>
+</BaseLayout>

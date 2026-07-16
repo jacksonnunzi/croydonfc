@@ -1,0 +1,152 @@
+---
+import { logoFor, initialsFor } from '../lib/clubs';
+
+interface Props {
+  teamLabel: string;         // "Seniors" | "Reserves" | "Under 19.5"
+  round: number;
+  date?: string;             // ISO (YYYY-MM-DD)
+  bounce?: string;           // "14:20"
+  venue?: string;
+  home?: string;
+  away?: string;
+  homeGoals?: number;
+  homeBehinds?: number;
+  awayGoals?: number;
+  awayBehinds?: number;
+  bye?: boolean;
+  ourTeam?: string;          // Our side in this match (used for bye card)
+}
+
+const {
+  teamLabel,
+  round,
+  date,
+  bounce,
+  venue,
+  home,
+  away,
+  homeGoals,
+  homeBehinds,
+  awayGoals,
+  awayBehinds,
+  bye = false,
+  ourTeam,
+} = Astro.props;
+
+const hasResult = typeof homeGoals === 'number' && typeof awayGoals === 'number';
+const totalPts = (g: number, b: number) => g * 6 + b;
+
+const homeTotal = hasResult ? totalPts(homeGoals!, homeBehinds!) : null;
+const awayTotal = hasResult ? totalPts(awayGoals!, awayBehinds!) : null;
+
+const formatDate = (iso?: string) =>
+  iso ? new Date(iso).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' }) : '';
+
+let winnerLine = '';
+if (hasResult && home && away) {
+  const croyHome = /croydon/i.test(home);
+  const margin = Math.abs(homeTotal! - awayTotal!);
+  if (homeTotal === awayTotal) {
+    winnerLine = 'Match drawn';
+  } else {
+    const croyWon = croyHome ? homeTotal! > awayTotal! : awayTotal! > homeTotal!;
+    winnerLine = `Croydon ${teamLabel} ${croyWon ? 'won' : 'lost'} by ${margin} points`;
+  }
+}
+
+const homeLogo = home ? logoFor(home) : null;
+const awayLogo = away ? logoFor(away) : null;
+const byeTeamName = ourTeam ?? `Croydon ${teamLabel === 'Under 19.5' ? 'U19.5' : teamLabel}`;
+const byeLogo = logoFor(byeTeamName);
+
+const statusLabel = bye ? 'Bye' : hasResult ? 'Final' : 'Upcoming';
+
+const footerBits: string[] = [];
+if (date) footerBits.push(formatDate(date));
+if (bounce) footerBits.push(bounce);
+if (venue) footerBits.push(venue);
+const footerText = footerBits.join(' · ');
+---
+<div class="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col border border-slate-200 h-full">
+  {/* Header strip */}
+  <div class="bg-club-primary text-white px-4 py-2 flex justify-between items-center text-[11px] uppercase tracking-[0.25em]">
+    <span class="font-semibold">{teamLabel} · Round {round}</span>
+    <span class="text-club-secondary font-bold">{statusLabel}</span>
+  </div>
+
+  {bye ? (
+    <div class="px-4 py-6 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 flex-1">
+      {/* Our team on the left, mirroring the home slot */}
+      <div class="flex flex-col items-center gap-2 text-center min-w-0">
+        {byeLogo ? (
+          <img src={byeLogo} alt="" width="64" height="64" loading="eager" decoding="async" class="h-16 w-16 object-contain" />
+        ) : (
+          <div class="h-16 w-16 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-display text-lg tracking-wider text-club-primary">{initialsFor(byeTeamName)}</div>
+        )}
+        <div class="text-[11px] uppercase tracking-wider text-slate-600 leading-tight text-center break-words">{byeTeamName}</div>
+      </div>
+
+      {/* BYE label in the middle */}
+      <div class="text-center px-2">
+        <div class="font-display text-4xl text-club-primary tracking-widest leading-none">BYE</div>
+      </div>
+
+      {/* Empty placeholder slot to keep the same three-column rhythm */}
+      <div class="flex flex-col items-center gap-2 text-center min-w-0 opacity-0" aria-hidden="true">
+        <div class="h-16 w-16"></div>
+        <div class="text-[11px] leading-tight">&nbsp;</div>
+      </div>
+    </div>
+  ) : (
+    <div class="px-4 py-6 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3">
+      {/* Home */}
+      <div class="flex flex-col items-center gap-2 text-center min-w-0">
+        {homeLogo ? (
+          <img src={homeLogo} alt="" width="64" height="64" loading="eager" decoding="async" class="h-16 w-16 object-contain" />
+        ) : (
+          <div class="h-16 w-16 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-display text-lg tracking-wider text-club-primary">{initialsFor(home ?? '')}</div>
+        )}
+        <div class="text-[11px] uppercase tracking-wider text-slate-600 leading-tight text-center break-words">{home}</div>
+      </div>
+
+      {/* Middle: scores or "v" */}
+      <div class="text-center px-2">
+        {hasResult ? (
+          <div class="grid grid-cols-[auto_auto_auto] items-center justify-center gap-5">
+            <div class="text-center">
+              <div class:list={['font-display text-5xl leading-none', (homeTotal! >= awayTotal!) ? 'text-club-primary' : 'text-slate-400']}>{homeTotal}</div>
+              <div class="mt-2 text-[11px] tracking-widest text-slate-500">{homeGoals}.{homeBehinds}</div>
+            </div>
+            <div class="font-display text-4xl text-club-primary leading-none tracking-wider">v</div>
+            <div class="text-center">
+              <div class:list={['font-display text-5xl leading-none', (awayTotal! >= homeTotal!) ? 'text-club-primary' : 'text-slate-400']}>{awayTotal}</div>
+              <div class="mt-2 text-[11px] tracking-widest text-slate-500">{awayGoals}.{awayBehinds}</div>
+            </div>
+          </div>
+        ) : (
+          <div class="font-display text-3xl text-slate-400 tracking-wider">v</div>
+        )}
+      </div>
+
+      {/* Away */}
+      <div class="flex flex-col items-center gap-2 text-center min-w-0">
+        {awayLogo ? (
+          <img src={awayLogo} alt="" width="64" height="64" loading="eager" decoding="async" class="h-16 w-16 object-contain" />
+        ) : (
+          <div class="h-16 w-16 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-display text-lg tracking-wider text-club-primary">{initialsFor(away ?? '')}</div>
+        )}
+        <div class="text-[11px] uppercase tracking-wider text-slate-600 leading-tight text-center break-words">{away}</div>
+      </div>
+    </div>
+  )}
+
+  {/* Footer */}
+  {hasResult && winnerLine && (
+    <div class="mt-auto bg-club-secondary text-white px-4 py-2 text-center text-[11px] font-bold uppercase tracking-widest">{winnerLine}</div>
+  )}
+  {footerText && (
+    <div class:list={['px-4 py-2 text-center text-[10px] uppercase tracking-[0.25em] text-slate-500 bg-slate-100', !hasResult && 'mt-auto']}>
+      {footerText}
+    </div>
+  )}
+</div>

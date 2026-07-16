@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Out on the full · Croydon FNC">
+  <section class="relative overflow-hidden bg-gradient-to-br from-club-primary via-club-primary to-club-dark text-white">
+    <div class="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-white/5 [clip-path:polygon(20%_0,100%_0,100%_100%,0%_100%)]"></div>
+    <div class="pointer-events-none absolute -left-20 -bottom-20 opacity-[0.06]">
+      <div class="text-[26rem] font-display leading-none">404</div>
+    </div>
+
+    <div class="relative max-w-4xl mx-auto px-4 py-24 text-center">
+      <div class="text-[11px] uppercase tracking-[0.3em] text-club-secondary mb-4">Umpire's decision</div>
+      <div class="font-display text-7xl sm:text-8xl lg:text-9xl tracking-widest leading-[0.9]">OUT ON<br/>THE FULL</div>
+      <p class="mt-8 text-white/80 text-lg max-w-xl mx-auto">
+        That page is out of bounds. Looks like the kick didn't make the distance. Let's get you back in play.
+      </p>
+      <div class="mt-10 flex flex-wrap justify-center gap-3">
+        <a href="/" class="bg-white text-club-primary px-6 py-3 rounded font-semibold hover:opacity-90">Back to home</a>
+        <a href="/fixtures" class="border border-white/40 px-6 py-3 rounded font-semibold hover:bg-white/10">This week's fixture</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

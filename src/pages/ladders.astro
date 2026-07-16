@@ -1,0 +1,134 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { loadFixtures, type TeamData } from '../lib/fixtures';
+import { logoFor, initialsFor } from '../lib/clubs';
+
+const data = await loadFixtures();
+const footballTeams: TeamData[] = data.teams.filter((t) => t.code === 'football');
+
+const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+---
+<BaseLayout title="Ladder · Croydon FNC">
+  <section class="max-w-6xl mx-auto px-4 py-12">
+    <h1 class="font-display text-4xl text-club-primary mb-2">Ladder</h1>
+    <p class="text-slate-600 mb-8">Click through the tabs to see each team's position.</p>
+
+    {footballTeams.length === 0 ? (
+      <p class="text-slate-500">No ladder data yet.</p>
+    ) : (
+      <div class="max-w-4xl mx-auto">
+        {/* TEAM TABS */}
+        <div class="team-tabs flex flex-wrap gap-2 border-b border-slate-200 mb-6" role="tablist">
+          {footballTeams.map((team, i) => {
+            const slug = slugify(team.label);
+            const active = i === 0;
+            return (
+              <button
+                type="button"
+                data-tab={slug}
+                role="tab"
+                aria-selected={active}
+                class:list={[
+                  'px-5 py-2 font-display tracking-wide border-b-2 transition uppercase',
+                  active ? 'border-club-primary text-club-primary' : 'border-transparent text-slate-500 hover:text-club-primary',
+                ]}
+              >{team.label}</button>
+            );
+          })}
+        </div>
+
+        {/* LADDER PANELS */}
+        {footballTeams.map((team, i) => {
+          const slug = slugify(team.label);
+          return (
+            <div data-team={slug} style={i === 0 ? '' : 'display:none'}>
+              <div class="flex items-baseline justify-between mb-3">
+                <h2 class="font-display text-2xl text-club-primary tracking-wide">Div 2 · {team.label}</h2>
+                <span class="text-xs uppercase tracking-[0.25em] text-slate-500">Eastern FNL</span>
+              </div>
+
+              {team.table.length === 0 ? (
+                <p class="text-slate-500">Ladder not yet available.</p>
+              ) : (
+                <div class="overflow-x-auto bg-white rounded-lg border border-slate-200 shadow-sm">
+                  <table class="min-w-full">
+                    <thead class="bg-club-primary text-white">
+                      <tr class="text-xs uppercase tracking-wider">
+                        <th class="px-3 py-3 text-left w-10">#</th>
+                        <th class="px-3 py-3 text-left">Team</th>
+                        <th class="px-3 py-3 text-center w-12">P</th>
+                        <th class="px-3 py-3 text-center w-16">%</th>
+                        <th class="px-3 py-3 text-center w-12">W</th>
+                        <th class="px-3 py-3 text-center w-12">L</th>
+                        <th class="px-3 py-3 text-center w-12">D</th>
+                        <th class="px-3 py-3 text-center w-14">Pts</th>
+                      </tr>
+                    </thead>
+                    <tbody class="text-sm">
+                      {team.table.map((row) => {
+                        const logo = logoFor(row.team);
+                        const isCroydon = /croydon/i.test(row.team);
+                        return (
+                          <tr class:list={[
+                            'border-t border-slate-100 transition',
+                            isCroydon ? 'bg-club-primary/10 font-semibold' : 'hover:bg-slate-50',
+                          ]}>
+                            <td class="px-3 py-3 text-slate-500 font-semibold">{row.pos}</td>
+                            <td class="px-3 py-3">
+                              <div class="flex items-center gap-3 min-w-0">
+                                {logo ? (
+                                  <img src={logo} alt="" width="32" height="32" loading="eager" decoding="async" class="h-8 w-8 object-contain shrink-0" />
+                                ) : (
+                                  <div class="h-8 w-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-[10px] font-bold text-club-primary shrink-0">{initialsFor(row.team)}</div>
+                                )}
+                                <span class:list={['truncate', isCroydon && 'text-club-primary']}>{row.team}</span>
+                              </div>
+                            </td>
+                            <td class="px-3 py-3 text-center tabular-nums">{row.p}</td>
+                            <td class="px-3 py-3 text-center tabular-nums">{row.pct.toFixed(2)}</td>
+                            <td class="px-3 py-3 text-center tabular-nums">{row.w}</td>
+                            <td class="px-3 py-3 text-center tabular-nums">{row.l}</td>
+                            <td class="px-3 py-3 text-center tabular-nums">{row.d}</td>
+                            <td class:list={['px-3 py-3 text-center font-bold tabular-nums', isCroydon ? 'text-club-primary' : 'text-slate-700']}>{row.pts}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    )}
+
+    {data.updated && <p class="text-xs text-slate-500 mt-6">Updated {data.updated}</p>}
+  </section>
+</BaseLayout>
+
+<script>
+  // Team tabs: toggle sibling [data-team] panels in the same parent.
+  document.querySelectorAll<HTMLElement>('.team-tabs').forEach((tabs) => {
+    const parent = tabs.parentElement;
+    if (!parent) return;
+    const buttons = tabs.querySelectorAll<HTMLButtonElement>('button[data-tab]');
+    const panels = Array.from(parent.children).filter((el): el is HTMLElement =>
+      el instanceof HTMLElement && el.hasAttribute('data-team')
+    );
+    const apply = (key: string) => {
+      buttons.forEach((b) => {
+        const on = b.dataset.tab === key;
+        b.setAttribute('aria-selected', String(on));
+        b.classList.toggle('border-club-primary', on);
+        b.classList.toggle('text-club-primary', on);
+        b.classList.toggle('border-transparent', !on);
+        b.classList.toggle('text-slate-500', !on);
+      });
+      panels.forEach((el) => {
+        el.style.display = el.getAttribute('data-team') === key ? '' : 'none';
+      });
+    };
+    buttons.forEach((b) => b.addEventListener('click', () => apply(b.dataset.tab!)));
+  });
+</script>

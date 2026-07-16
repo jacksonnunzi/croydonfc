@@ -2,6 +2,6 @@ import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
 
 export default defineConfig({
-  site: 'https://croydonfc.netlify.app',
+  site: 'https://croydonfootballclub.com.au',
   integrations: [tailwind()],
 });

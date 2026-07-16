@@ -1,14 +1,12 @@
-local_backend: true
-
 backend:
-  name: git-gateway
+  name: github
+  repo: jacksonnunzi/croydonfc
   branch: main
-
-publish_mode: editorial_workflow
+  base_url: https://cms-auth.croydonfootballclub.com.au
 media_folder: "public/images/uploads"
 public_folder: "/images/uploads"
-site_url: https://croydonfc.netlify.app
-display_url: https://croydonfc.netlify.app
+site_url: https://croydonfootballclub.com.au
+display_url: https://croydonfootballclub.com.au
 logo_url: /favicon.svg
 
 collections:

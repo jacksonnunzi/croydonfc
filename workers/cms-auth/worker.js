@@ -1,64 +1,26 @@
-const OAUTH_HOST = 'https://github.com';
-const TOKEN_HOST = 'https://github.com';
-const OAUTH_PATH = '/login/oauth/authorize';
-const TOKEN_PATH = '/login/oauth/access_token';
-const SCOPE = 'repo,user';
-
 export default {
   async fetch(request, env) {
-    const url = new URL(request.url);
+    // CORS headers for the admin page
+    const cors = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    };
 
-    if (url.pathname === '/auth') {
-      const params = new URLSearchParams({
-        client_id: env.GITHUB_CLIENT_ID,
-        redirect_uri: `${url.origin}/callback`,
-        scope: SCOPE,
-        state: crypto.randomUUID(),
-      });
-      return Response.redirect(`${OAUTH_HOST}${OAUTH_PATH}?${params}`, 302);
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { headers: cors });
     }
 
-    if (url.pathname === '/callback') {
-      const code = url.searchParams.get('code');
-      if (!code) return new Response('Missing code', { status: 400 });
-
-      const tokenRes = await fetch(`${TOKEN_HOST}${TOKEN_PATH}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        body: JSON.stringify({
-          client_id: env.GITHUB_CLIENT_ID,
-          client_secret: env.GITHUB_CLIENT_SECRET,
-          code,
-        }),
-      });
-
-      const data = await tokenRes.json();
-
-      if (data.error) {
-        return new Response(`OAuth error: ${data.error_description}`, { status: 401 });
+    if (request.method === 'POST' && new URL(request.url).pathname === '/auth') {
+      try {
+        const { hash } = await request.json();
+        if (hash === env.PASSWORD_HASH) {
+          return Response.json({ token: env.GITHUB_PAT }, { headers: cors });
+        }
+        return Response.json({ error: 'Wrong password' }, { status: 401, headers: cors });
+      } catch {
+        return Response.json({ error: 'Bad request' }, { status: 400, headers: cors });
       }
-
-      const content = JSON.stringify({
-        token: data.access_token,
-        provider: 'github',
-      });
-
-      return new Response(`
-<!doctype html>
-<html><body><script>
-(function() {
-  function sendMsg(msg) {
-    var lo = (opener || parent);
-    lo.postMessage(msg, window.location.origin);
-  }
-  sendMsg('authorization:github:success:${content}');
-})();
-</script></body></html>`, {
-        headers: { 'Content-Type': 'text/html' },
-      });
     }
 
     return new Response('Not found', { status: 404 });

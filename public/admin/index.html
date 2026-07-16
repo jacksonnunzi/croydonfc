@@ -16,150 +16,84 @@
         background: linear-gradient(135deg, #0b2545 0%, #0d1b3e 100%);
         color: #fff;
       }
-      .auth-screen .box {
-        text-align: center;
-        width: 100%;
-        max-width: 380px;
-        padding: 2rem;
-      }
-      .auth-screen h1 {
-        font-size: 1.4rem;
-        font-weight: 700;
-        letter-spacing: 0.15em;
-        text-transform: uppercase;
-        margin-bottom: 0.25rem;
-      }
+      .auth-screen .box { text-align: center; width: 100%; max-width: 340px; padding: 2rem; }
+      .auth-screen h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.25rem; }
       .auth-screen .sub { font-size: 0.75rem; opacity: 0.6; margin-bottom: 2rem; }
-      .auth-screen input {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        border: 1px solid rgba(255,255,255,0.2);
-        border-radius: 6px;
-        background: rgba(255,255,255,0.1);
-        color: #fff;
-        font-size: 1rem;
-        outline: none;
-      }
+      .auth-screen input { width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; background: rgba(255,255,255,0.1); color: #fff; font-size: 1rem; outline: none; }
       .auth-screen input::placeholder { color: rgba(255,255,255,0.4); }
       .auth-screen input:focus { border-color: rgba(255,255,255,0.5); }
-      .auth-screen button {
-        width: 100%;
-        margin-top: 0.75rem;
-        padding: 0.75rem;
-        border: none;
-        border-radius: 6px;
-        background: #fff;
-        color: #0b2545;
-        font-weight: 600;
-        font-size: 0.95rem;
-        cursor: pointer;
-      }
+      .auth-screen button { width: 100%; margin-top: 0.75rem; padding: 0.75rem; border: none; border-radius: 6px; background: #fff; color: #0b2545; font-weight: 600; font-size: 0.95rem; cursor: pointer; }
       .auth-screen button:hover { opacity: 0.9; }
+      .auth-screen button:disabled { opacity: 0.5; cursor: not-allowed; }
       .auth-screen .err { color: #f87171; font-size: 0.8rem; margin-top: 0.75rem; min-height: 1.2em; }
       .auth-screen .home-link { display: inline-block; margin-top: 1.5rem; font-size: 0.8rem; color: rgba(255,255,255,0.5); text-decoration: none; }
       .auth-screen .home-link:hover { color: #fff; }
-      .auth-screen .hint { font-size: 0.72rem; opacity: 0.4; margin-top: 1.25rem; line-height: 1.5; text-align: left; }
-      .auth-screen p { font-size: 0.85rem; opacity: 0.8; margin-bottom: 1.25rem; line-height: 1.5; }
     </style>
   </head>
   <body>
-    <!-- Screen 1: Password -->
     <div id="gate" class="auth-screen">
       <div class="box">
         <h1>Croydon FC</h1>
         <div class="sub">Content Manager</div>
         <form id="login-form">
           <input type="password" id="pw" placeholder="Password" autocomplete="current-password" autofocus />
-          <button type="submit">Log in</button>
+          <button type="submit" id="btn">Log in</button>
           <div class="err" id="err"></div>
         </form>
         <a href="/" class="home-link">&larr; Back to website</a>
       </div>
     </div>
 
-    <!-- Screen 2: One-time GitHub token (only shown once) -->
-    <div id="setup" class="auth-screen" style="display:none">
-      <div class="box">
-        <h1>Croydon FC</h1>
-        <div class="sub">One-time setup</div>
-        <p>Paste a GitHub personal access token so the editor can save changes. This is stored in your browser only and you won't be asked again.</p>
-        <form id="token-form">
-          <input type="password" id="token" placeholder="GitHub token (ghp_...)" />
-          <button type="submit">Save &amp; continue</button>
-          <div class="err" id="token-err"></div>
-        </form>
-        <div class="hint">Create one at github.com &gt; Settings &gt; Developer settings &gt; Personal access tokens &gt; Fine-grained tokens. Give it <strong>Contents read/write</strong> access to jacksonnunzi/croydonfc.</div>
-        <a href="/" class="home-link">&larr; Back to website</a>
-      </div>
-    </div>
-
     <script>
-      var HASH = '64d132133a93a9bd9710100109df3fd5bf18eebdae2db060f294d0928ef9ea77';
+      var AUTH_URL = 'https://cms-auth.jacksonnunziante09.workers.dev/auth';
 
       document.getElementById('login-form').addEventListener('submit', async function (e) {
         e.preventDefault();
-        var pw = document.getElementById('pw').value;
-        var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
-        var hex = Array.from(new Uint8Array(buf)).map(function (x) { return x.toString(16).padStart(2, '0'); }).join('');
-        if (hex === HASH) {
-          sessionStorage.setItem('cfc-admin', '1');
-          afterPassword();
-        } else {
-          document.getElementById('err').textContent = 'Wrong password';
+        var btn = document.getElementById('btn');
+        var errEl = document.getElementById('err');
+        btn.disabled = true;
+        btn.textContent = 'Logging in...';
+        errEl.textContent = '';
+
+        try {
+          var pw = document.getElementById('pw').value;
+          var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
+          var hex = Array.from(new Uint8Array(buf)).map(function (x) { return x.toString(16).padStart(2, '0'); }).join('');
+
+          var res = await fetch(AUTH_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ hash: hex })
+          });
+          var data = await res.json();
+
+          if (data.token) {
+            loadCMS(data.token);
+          } else {
+            errEl.textContent = 'Wrong password';
+            btn.disabled = false;
+            btn.textContent = 'Log in';
+          }
+        } catch (err) {
+          errEl.textContent = 'Connection error. Try again.';
+          btn.disabled = false;
+          btn.textContent = 'Log in';
         }
       });
-
-      document.getElementById('token-form').addEventListener('submit', function (e) {
-        e.preventDefault();
-        var t = document.getElementById('token').value.trim();
-        if (!t) { document.getElementById('token-err').textContent = 'Paste your token'; return; }
-        localStorage.setItem('cfc-gh-token', t);
-        loadCMS(t);
-      });
-
-      function afterPassword() {
-        document.getElementById('gate').style.display = 'none';
-        var saved = localStorage.getItem('cfc-gh-token');
-        if (saved) {
-          loadCMS(saved);
-        } else {
-          document.getElementById('setup').style.display = 'flex';
-        }
-      }
 
       function loadCMS(token) {
         document.getElementById('gate').style.display = 'none';
-        document.getElementById('setup').style.display = 'none';
-
-        // Inject token into both possible localStorage keys so Decap CMS skips its login screen
-        var user = JSON.stringify({
-          token: token,
-          name: 'Editor',
-          login: 'editor',
-          avatar_url: '',
-          backendName: 'github'
-        });
+        var user = JSON.stringify({ token: token, name: 'Editor', login: 'editor', avatar_url: '', backendName: 'github' });
         localStorage.setItem('netlify-cms-user', user);
         localStorage.setItem('decap-cms-user', user);
-
-        // Tell CMS we'll init manually
         window.CMS_MANUAL_INIT = true;
-
         var s = document.createElement('script');
         s.src = 'https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js';
         s.onload = function () {
-          if (window.initCMS) {
-            window.initCMS({ config: { backend: { name: 'github', repo: 'jacksonnunzi/croydonfc', branch: 'main' } } });
-          } else if (window.CMS && window.CMS.init) {
-            window.CMS.init({ config: { backend: { name: 'github', repo: 'jacksonnunzi/croydonfc', branch: 'main' } } });
-          }
+          var init = window.initCMS || (window.CMS && window.CMS.init);
+          if (init) init({ config: { backend: { name: 'github', repo: 'jacksonnunzi/croydonfc', branch: 'main' } } });
         };
         document.body.appendChild(s);
-      }
-
-      // Stay logged in for the browser session
-      if (sessionStorage.getItem('cfc-admin') === '1') {
-        afterPassword();
       }
     </script>
   </body>

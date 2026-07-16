@@ -58,6 +58,7 @@
       #gate .err { color: #f87171; font-size: 0.8rem; margin-top: 0.75rem; min-height: 1.2em; }
       #gate .home-link { display: inline-block; margin-top: 1.5rem; font-size: 0.8rem; color: rgba(255,255,255,0.5); text-decoration: none; }
       #gate .home-link:hover { color: #fff; }
+      #gate .hint { font-size: 0.7rem; opacity: 0.4; margin-top: 1rem; line-height: 1.4; }
     </style>
   </head>
   <body>
@@ -74,12 +75,23 @@
       </div>
     </div>
 
+    <!-- Setup screen: one-time GitHub token entry -->
+    <div id="setup" style="display:none">
+      <div class="box">
+        <h1>Croydon FC</h1>
+        <div class="sub">One-time setup</div>
+        <p style="font-size:0.85rem;opacity:0.8;margin-bottom:1rem;line-height:1.5">Paste a GitHub personal access token so the editor can save changes. This is stored in your browser only.</p>
+        <form id="token-form">
+          <input type="password" id="token" placeholder="GitHub token (ghp_...)" />
+          <button type="submit">Save &amp; continue</button>
+          <div class="err" id="token-err"></div>
+        </form>
+        <p class="hint">Create one at github.com &gt; Settings &gt; Developer settings &gt; Personal access tokens &gt; Fine-grained tokens. Give it Contents read/write access to jacksonnunzi/croydonfc.</p>
+        <a href="/" class="home-link">&larr; Back to website</a>
+      </div>
+    </div>
+
     <script>
-      // Password hash (SHA-256 of the plaintext password).
-      // To change the password, run in a browser console:
-      //   crypto.subtle.digest('SHA-256', new TextEncoder().encode('YOUR_NEW_PASSWORD'))
-      //     .then(b => console.log(Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2,'0')).join('')))
-      // Then paste the hex string below.
       var HASH = '64d132133a93a9bd9710100109df3fd5bf18eebdae2db060f294d0928ef9ea77';
 
       document.getElementById('login-form').addEventListener('submit', async function (e) {
@@ -89,22 +101,48 @@
         var hex = Array.from(new Uint8Array(buf)).map(function (x) { return x.toString(16).padStart(2, '0'); }).join('');
         if (hex === HASH) {
           sessionStorage.setItem('cfc-admin', '1');
-          loadCMS();
+          afterPassword();
         } else {
           document.getElementById('err').textContent = 'Wrong password';
         }
       });
 
-      function loadCMS() {
+      document.getElementById('token-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var t = document.getElementById('token').value.trim();
+        if (!t) { document.getElementById('token-err').textContent = 'Paste your token'; return; }
+        localStorage.setItem('cfc-gh-token', t);
+        loadCMS(t);
+      });
+
+      function afterPassword() {
         document.getElementById('gate').style.display = 'none';
+        var saved = localStorage.getItem('cfc-gh-token');
+        if (saved) {
+          loadCMS(saved);
+        } else {
+          document.getElementById('setup').style.display = 'flex';
+        }
+      }
+
+      function loadCMS(token) {
+        document.getElementById('gate').style.display = 'none';
+        document.getElementById('setup').style.display = 'none';
+        // Pre-auth Decap CMS so it skips the GitHub OAuth screen
+        localStorage.setItem('netlify-cms-user', JSON.stringify({
+          token: token,
+          name: 'Editor',
+          login: 'editor',
+          avatar_url: '',
+          backendName: 'github'
+        }));
         var s = document.createElement('script');
         s.src = 'https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js';
         document.body.appendChild(s);
       }
 
-      // Stay logged in for the session
       if (sessionStorage.getItem('cfc-admin') === '1') {
-        loadCMS();
+        afterPassword();
       }
     </script>
   </body>

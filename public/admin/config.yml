@@ -2,7 +2,7 @@ backend:
   name: github
   repo: jacksonnunzi/croydonfc
   branch: main
-  base_url: https://cms-auth.croydonfootballclub.com.au
+  base_url: https://cms-auth.jacksonnunziante09.workers.dev
 media_folder: "public/images/uploads"
 public_folder: "/images/uploads"
 site_url: https://croydonfootballclub.com.au

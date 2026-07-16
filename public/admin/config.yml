@@ -6,7 +6,7 @@ media_folder: "public/images/uploads"
 public_folder: "/images/uploads"
 site_url: https://croydonfootballclub.com.au
 display_url: https://croydonfootballclub.com.au
-logo_url: /favicon.svg
+logo_url: /favicon.png
 
 collections:
   - name: "news"

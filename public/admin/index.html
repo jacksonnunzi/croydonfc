@@ -8,7 +8,7 @@
     <style>
       *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
       body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-      #gate {
+      .auth-screen {
         min-height: 100vh;
         display: flex;
         align-items: center;
@@ -16,21 +16,21 @@
         background: linear-gradient(135deg, #0b2545 0%, #0d1b3e 100%);
         color: #fff;
       }
-      #gate .box {
+      .auth-screen .box {
         text-align: center;
         width: 100%;
-        max-width: 340px;
+        max-width: 380px;
         padding: 2rem;
       }
-      #gate h1 {
+      .auth-screen h1 {
         font-size: 1.4rem;
         font-weight: 700;
         letter-spacing: 0.15em;
         text-transform: uppercase;
         margin-bottom: 0.25rem;
       }
-      #gate .sub { font-size: 0.75rem; opacity: 0.6; margin-bottom: 2rem; }
-      #gate input {
+      .auth-screen .sub { font-size: 0.75rem; opacity: 0.6; margin-bottom: 2rem; }
+      .auth-screen input {
         width: 100%;
         padding: 0.75rem 1rem;
         border: 1px solid rgba(255,255,255,0.2);
@@ -40,9 +40,9 @@
         font-size: 1rem;
         outline: none;
       }
-      #gate input::placeholder { color: rgba(255,255,255,0.4); }
-      #gate input:focus { border-color: rgba(255,255,255,0.5); }
-      #gate button {
+      .auth-screen input::placeholder { color: rgba(255,255,255,0.4); }
+      .auth-screen input:focus { border-color: rgba(255,255,255,0.5); }
+      .auth-screen button {
         width: 100%;
         margin-top: 0.75rem;
         padding: 0.75rem;
@@ -54,15 +54,17 @@
         font-size: 0.95rem;
         cursor: pointer;
       }
-      #gate button:hover { opacity: 0.9; }
-      #gate .err { color: #f87171; font-size: 0.8rem; margin-top: 0.75rem; min-height: 1.2em; }
-      #gate .home-link { display: inline-block; margin-top: 1.5rem; font-size: 0.8rem; color: rgba(255,255,255,0.5); text-decoration: none; }
-      #gate .home-link:hover { color: #fff; }
-      #gate .hint { font-size: 0.7rem; opacity: 0.4; margin-top: 1rem; line-height: 1.4; }
+      .auth-screen button:hover { opacity: 0.9; }
+      .auth-screen .err { color: #f87171; font-size: 0.8rem; margin-top: 0.75rem; min-height: 1.2em; }
+      .auth-screen .home-link { display: inline-block; margin-top: 1.5rem; font-size: 0.8rem; color: rgba(255,255,255,0.5); text-decoration: none; }
+      .auth-screen .home-link:hover { color: #fff; }
+      .auth-screen .hint { font-size: 0.72rem; opacity: 0.4; margin-top: 1.25rem; line-height: 1.5; text-align: left; }
+      .auth-screen p { font-size: 0.85rem; opacity: 0.8; margin-bottom: 1.25rem; line-height: 1.5; }
     </style>
   </head>
   <body>
-    <div id="gate">
+    <!-- Screen 1: Password -->
+    <div id="gate" class="auth-screen">
       <div class="box">
         <h1>Croydon FC</h1>
         <div class="sub">Content Manager</div>
@@ -75,18 +77,18 @@
       </div>
     </div>
 
-    <!-- Setup screen: one-time GitHub token entry -->
-    <div id="setup" style="display:none">
+    <!-- Screen 2: One-time GitHub token (only shown once) -->
+    <div id="setup" class="auth-screen" style="display:none">
       <div class="box">
         <h1>Croydon FC</h1>
         <div class="sub">One-time setup</div>
-        <p style="font-size:0.85rem;opacity:0.8;margin-bottom:1rem;line-height:1.5">Paste a GitHub personal access token so the editor can save changes. This is stored in your browser only.</p>
+        <p>Paste a GitHub personal access token so the editor can save changes. This is stored in your browser only and you won't be asked again.</p>
         <form id="token-form">
           <input type="password" id="token" placeholder="GitHub token (ghp_...)" />
           <button type="submit">Save &amp; continue</button>
           <div class="err" id="token-err"></div>
         </form>
-        <p class="hint">Create one at github.com &gt; Settings &gt; Developer settings &gt; Personal access tokens &gt; Fine-grained tokens. Give it Contents read/write access to jacksonnunzi/croydonfc.</p>
+        <div class="hint">Create one at github.com &gt; Settings &gt; Developer settings &gt; Personal access tokens &gt; Fine-grained tokens. Give it <strong>Contents read/write</strong> access to jacksonnunzi/croydonfc.</div>
         <a href="/" class="home-link">&larr; Back to website</a>
       </div>
     </div>
@@ -128,19 +130,34 @@
       function loadCMS(token) {
         document.getElementById('gate').style.display = 'none';
         document.getElementById('setup').style.display = 'none';
-        // Pre-auth Decap CMS so it skips the GitHub OAuth screen
-        localStorage.setItem('netlify-cms-user', JSON.stringify({
+
+        // Inject token into both possible localStorage keys so Decap CMS skips its login screen
+        var user = JSON.stringify({
           token: token,
           name: 'Editor',
           login: 'editor',
           avatar_url: '',
           backendName: 'github'
-        }));
+        });
+        localStorage.setItem('netlify-cms-user', user);
+        localStorage.setItem('decap-cms-user', user);
+
+        // Tell CMS we'll init manually
+        window.CMS_MANUAL_INIT = true;
+
         var s = document.createElement('script');
         s.src = 'https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js';
+        s.onload = function () {
+          if (window.initCMS) {
+            window.initCMS({ config: { backend: { name: 'github', repo: 'jacksonnunzi/croydonfc', branch: 'main' } } });
+          } else if (window.CMS && window.CMS.init) {
+            window.CMS.init({ config: { backend: { name: 'github', repo: 'jacksonnunzi/croydonfc', branch: 'main' } } });
+          }
+        };
         document.body.appendChild(s);
       }
 
+      // Stay logged in for the browser session
       if (sessionStorage.getItem('cfc-admin') === '1') {
         afterPassword();
       }

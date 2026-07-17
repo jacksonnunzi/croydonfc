@@ -2,7 +2,7 @@ export default {
   async fetch(request, env) {
     // CORS headers for the admin page
     const cors = {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': 'https://croydonfootballclub.com.au',
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
     };

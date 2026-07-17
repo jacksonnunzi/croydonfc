@@ -11,7 +11,7 @@ const links = [
 
 const externalLinks = [
   { href: 'https://www.playhq.com/afl/register/8d359d', label: 'Registration' },
-  { href: '/uniform', label: 'Uniform' },
+  { href: '/uniform', label: 'Uniform', internal: true },
 ];
 
 const path = Astro.url.pathname;
@@ -23,15 +23,17 @@ const path = Astro.url.pathname;
       {externalLinks.map((l) => (
         <a
           href={l.href}
-          target="_blank"
-          rel="noopener"
+          target={l.internal ? undefined : '_blank'}
+          rel={l.internal ? undefined : 'noopener'}
           class="hover:text-club-secondary transition whitespace-nowrap inline-flex items-center gap-1.5"
         >
           {l.label}
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M7 17L17 7"/>
-            <path d="M7 7h10v10"/>
-          </svg>
+          {!l.internal && (
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M7 17L17 7"/>
+              <path d="M7 7h10v10"/>
+            </svg>
+          )}
         </a>
       ))}
     </div>

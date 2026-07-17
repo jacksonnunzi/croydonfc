@@ -20,7 +20,7 @@ const players = defineCollection({
     z.object({
       name: z.string(),
       code: z.enum(['football', 'netball']).default('football'),
-      position: z.string(),
+      position: z.string().optional(),
       number: z.number().int().min(0).max(99).optional(),
       photo: image().optional(),
       joined: z.string().optional(),
@@ -45,7 +45,7 @@ const events = defineCollection({
     summary: z.string().optional(),
     // Public URL path to the uploaded hero image (e.g. "/images/uploads/event.png").
     hero: z.string().optional(),
-    rsvpUrl: z.string().url().optional(),
+    rsvpUrl: z.string().optional(),
     draft: z.boolean().default(false),
   }),
 });

@@ -5,9 +5,9 @@
  * Without the key, this module exports a no-op that returns null so the
  * caller falls back to the local JSON in src/data/fixtures.json.
  *
- * Required env vars (set in Netlify build settings, never commit):
- *   PLAYHQ_API_KEY      - UUID supplied by PlayHQ via the EFNL admin
- *   PLAYHQ_ORG_ID       - 32-char UUID for Croydon FNC's PlayHQ organisation
+ * Required env vars (set in Cloudflare Pages build settings, never commit):
+ *   PLAYHQ_API_KEY      - UUID supplied by PlayHQ via the EFNL admin (set in build env)
+ *   PLAYHQ_ORG_ID       - 32-char UUID for Croydon FNC's PlayHQ organisation (set in build env)
  *
  * Optional env vars:
  *   PLAYHQ_TENANT       - sport tenant code, defaults to "afl"

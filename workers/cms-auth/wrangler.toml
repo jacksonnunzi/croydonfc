@@ -2,7 +2,6 @@ name = "cms-auth"
 main = "worker.js"
 compatibility_date = "2024-01-01"
 
-[vars]
-# These are set via `wrangler secret put` - not stored here
-# GITHUB_CLIENT_ID = ""
-# GITHUB_CLIENT_SECRET = ""
+# Secrets set via `wrangler secret put`:
+#   PASSWORD_HASH  - SHA-256 hex of the admin password
+#   GITHUB_PAT     - Fine-grained GitHub personal access token

@@ -1,10 +1,10 @@
 # PlayHQ API key request
 
-Once sent and the key arrives, set these in Netlify env vars (never commit):
+Once sent and the key arrives, set these in Cloudflare Pages env vars (never commit):
 
-- `PLAYHQ_API_KEY` — the key PlayHQ sends back
-- `PLAYHQ_ORG_ID` — `1dda6c4e` (from the public PlayHQ URL)
-- `PLAYHQ_TENANT` — `afl`
+- `PLAYHQ_API_KEY` - the key PlayHQ sends back
+- `PLAYHQ_ORG_ID` - `1dda6c4e` (from the public PlayHQ URL)
+- `PLAYHQ_TENANT` - `afl`
 
 The integration code is already in `src/lib/playhq.ts`; `loadFixtures()` will
 automatically switch from the `src/data/fixtures.json` fallback to the live API
@@ -15,7 +15,7 @@ the moment those vars are present. No code changes required.
 ## Draft email
 
 **To:** support@playhq.com (or via https://support.playhq.com/hc/en-au/requests/new)
-**Subject:** API key request — Croydon Football Netball Club website
+**Subject:** API key request - Croydon Football Netball Club website
 
 Hi PlayHQ team,
 
